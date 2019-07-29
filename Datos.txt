@@ -1,0 +1,12 @@
+'' ESTE ES EL WEBSERVICES DE PRUEBAS https://www.fel.mx/WSTimbrado33Test/WSCFDI33.svc?WSDL HAY QUE CAMBIARLO PARA TIMBRAR.
+            '    'Configuration()
+            '    Path = IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "Cert") 'System.AppDomain.CurrentDomain.BaseDirectory
+            '    CertFile = IO.Path.Combine(Path, "CertificadoFirmadoPM.cer")
+            '    KeyFile = (IO.Path.Combine(Path, "LlavePkcs8PM.key"))
+            '    KeyPass = "12345678a"
+            '    Errores = ""
+
+            '    UsuarioComRet = "CRE840310D33"
+            '    ContraseñaComRet = "contRa$3na"
+            '    rfcEmisro = "TES030201001"
+            '    'Public NombreFELL As String = "temporal" ' Pruebas

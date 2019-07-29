@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://tempuri.org/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="WSCFDI33" targetNamespace="http://tempuri.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsp:Policy wsu:Id="soapHttpEndpointHttps_policy">
+    <wsp:ExactlyOne>
+      <wsp:All>
+        <sp:TransportBinding xmlns:sp="http://schemas.xmlsoap.org/ws/2005/07/securitypolicy">
+          <wsp:Policy>
+            <sp:TransportToken>
+              <wsp:Policy>
+                <sp:HttpsToken RequireClientCertificate="false" />
+              </wsp:Policy>
+            </sp:TransportToken>
+            <sp:AlgorithmSuite>
+              <wsp:Policy>
+                <sp:Basic256 />
+              </wsp:Policy>
+            </sp:AlgorithmSuite>
+            <sp:Layout>
+              <wsp:Policy>
+                <sp:Strict />
+              </wsp:Policy>
+            </sp:Layout>
+          </wsp:Policy>
+        </sp:TransportBinding>
+      </wsp:All>
+    </wsp:ExactlyOne>
+  </wsp:Policy>
+  <wsdl:types>
+    <xsd:schema targetNamespace="http://tempuri.org/Imports">
+      <xsd:import schemaLocation="http://www.fel.mx/WSTimbrado33/WSCFDI33.svc?xsd=xsd0" namespace="http://tempuri.org/" />
+      <xsd:import schemaLocation="http://www.fel.mx/WSTimbrado33/WSCFDI33.svc?xsd=xsd1" namespace="http://schemas.microsoft.com/2003/10/Serialization/" />
+      <xsd:import schemaLocation="http://www.fel.mx/WSTimbrado33/WSCFDI33.svc?xsd=xsd2" namespace="http://schemas.datacontract.org/2004/07/TES.TFD.V33.Negocios" />
+      <xsd:import schemaLocation="http://www.fel.mx/WSTimbrado33/WSCFDI33.svc?xsd=xsd3" namespace="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+    </xsd:schema>
+  </wsdl:types>
+  <wsdl:message name="IWSCFDI33_TimbrarCFDI_InputMessage">
+    <wsdl:part name="parameters" element="tns:TimbrarCFDI" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_TimbrarCFDI_OutputMessage">
+    <wsdl:part name="parameters" element="tns:TimbrarCFDIResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_CancelarCFDI_InputMessage">
+    <wsdl:part name="parameters" element="tns:CancelarCFDI" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_CancelarCFDI_OutputMessage">
+    <wsdl:part name="parameters" element="tns:CancelarCFDIResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_CancelacionAsincrona_InputMessage">
+    <wsdl:part name="parameters" element="tns:CancelacionAsincrona" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_CancelacionAsincrona_OutputMessage">
+    <wsdl:part name="parameters" element="tns:CancelacionAsincronaResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_EstatusCancelacionAsincrona_InputMessage">
+    <wsdl:part name="parameters" element="tns:EstatusCancelacionAsincrona" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_EstatusCancelacionAsincrona_OutputMessage">
+    <wsdl:part name="parameters" element="tns:EstatusCancelacionAsincronaResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ObtenerPDF_InputMessage">
+    <wsdl:part name="parameters" element="tns:ObtenerPDF" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ObtenerPDF_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ObtenerPDFResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ObtenerAcuseEnvio_InputMessage">
+    <wsdl:part name="parameters" element="tns:ObtenerAcuseEnvio" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ObtenerAcuseEnvio_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ObtenerAcuseEnvioResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ObtenerAcuseCancelacion_InputMessage">
+    <wsdl:part name="parameters" element="tns:ObtenerAcuseCancelacion" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ObtenerAcuseCancelacion_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ObtenerAcuseCancelacionResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_CambiarPassword_InputMessage">
+    <wsdl:part name="parameters" element="tns:CambiarPassword" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_CambiarPassword_OutputMessage">
+    <wsdl:part name="parameters" element="tns:CambiarPasswordResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarComplementoTimbre_InputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarComplementoTimbre" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarComplementoTimbre_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarComplementoTimbreResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarTimbrePorReferencia_InputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarTimbrePorReferencia" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarTimbrePorReferencia_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarTimbrePorReferenciaResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarTimbrePorSello_InputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarTimbrePorSello" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarTimbrePorSello_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarTimbrePorSelloResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarCreditos_InputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarCreditos" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarCreditos_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarCreditosResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarComprobantes_InputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarComprobantes" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarComprobantes_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarComprobantesResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ValidarRFC_InputMessage">
+    <wsdl:part name="parameters" element="tns:ValidarRFC" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ValidarRFC_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ValidarRFCResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ObtenerPeticionesPendientesCancelacion_InputMessage">
+    <wsdl:part name="parameters" element="tns:ObtenerPeticionesPendientesCancelacion" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ObtenerPeticionesPendientesCancelacion_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ObtenerPeticionesPendientesCancelacionResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ProcesarAceptacionRechazo_InputMessage">
+    <wsdl:part name="parameters" element="tns:ProcesarAceptacionRechazo" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ProcesarAceptacionRechazo_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ProcesarAceptacionRechazoResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_CancelarCFDIConValidacion_InputMessage">
+    <wsdl:part name="parameters" element="tns:CancelarCFDIConValidacion" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_CancelarCFDIConValidacion_OutputMessage">
+    <wsdl:part name="parameters" element="tns:CancelarCFDIConValidacionResponse" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarComprobantesRelacionados_InputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarComprobantesRelacionados" />
+  </wsdl:message>
+  <wsdl:message name="IWSCFDI33_ConsultarComprobantesRelacionados_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ConsultarComprobantesRelacionadosResponse" />
+  </wsdl:message>
+  <wsdl:portType name="IWSCFDI33">
+    <wsdl:operation name="TimbrarCFDI">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/TimbrarCFDI" message="tns:IWSCFDI33_TimbrarCFDI_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/TimbrarCFDIResponse" message="tns:IWSCFDI33_TimbrarCFDI_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelarCFDI">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/CancelarCFDI" message="tns:IWSCFDI33_CancelarCFDI_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/CancelarCFDIResponse" message="tns:IWSCFDI33_CancelarCFDI_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelacionAsincrona">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/CancelacionAsincrona" message="tns:IWSCFDI33_CancelacionAsincrona_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/CancelacionAsincronaResponse" message="tns:IWSCFDI33_CancelacionAsincrona_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="EstatusCancelacionAsincrona">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/EstatusCancelacionAsincrona" message="tns:IWSCFDI33_EstatusCancelacionAsincrona_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/EstatusCancelacionAsincronaResponse" message="tns:IWSCFDI33_EstatusCancelacionAsincrona_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerPDF">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ObtenerPDF" message="tns:IWSCFDI33_ObtenerPDF_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ObtenerPDFResponse" message="tns:IWSCFDI33_ObtenerPDF_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerAcuseEnvio">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ObtenerAcuseEnvio" message="tns:IWSCFDI33_ObtenerAcuseEnvio_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ObtenerAcuseEnvioResponse" message="tns:IWSCFDI33_ObtenerAcuseEnvio_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerAcuseCancelacion">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ObtenerAcuseCancelacion" message="tns:IWSCFDI33_ObtenerAcuseCancelacion_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ObtenerAcuseCancelacionResponse" message="tns:IWSCFDI33_ObtenerAcuseCancelacion_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="CambiarPassword">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/CambiarPassword" message="tns:IWSCFDI33_CambiarPassword_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/CambiarPasswordResponse" message="tns:IWSCFDI33_CambiarPassword_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarComplementoTimbre">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarComplementoTimbre" message="tns:IWSCFDI33_ConsultarComplementoTimbre_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarComplementoTimbreResponse" message="tns:IWSCFDI33_ConsultarComplementoTimbre_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarTimbrePorReferencia">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarTimbrePorReferencia" message="tns:IWSCFDI33_ConsultarTimbrePorReferencia_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarTimbrePorReferenciaResponse" message="tns:IWSCFDI33_ConsultarTimbrePorReferencia_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarTimbrePorSello">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarTimbrePorSello" message="tns:IWSCFDI33_ConsultarTimbrePorSello_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarTimbrePorSelloResponse" message="tns:IWSCFDI33_ConsultarTimbrePorSello_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarCreditos">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarCreditos" message="tns:IWSCFDI33_ConsultarCreditos_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarCreditosResponse" message="tns:IWSCFDI33_ConsultarCreditos_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarComprobantes">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarComprobantes" message="tns:IWSCFDI33_ConsultarComprobantes_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarComprobantesResponse" message="tns:IWSCFDI33_ConsultarComprobantes_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ValidarRFC">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ValidarRFC" message="tns:IWSCFDI33_ValidarRFC_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ValidarRFCResponse" message="tns:IWSCFDI33_ValidarRFC_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerPeticionesPendientesCancelacion">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ObtenerPeticionesPendientesCancelacion" message="tns:IWSCFDI33_ObtenerPeticionesPendientesCancelacion_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ObtenerPeticionesPendientesCancelacionResponse" message="tns:IWSCFDI33_ObtenerPeticionesPendientesCancelacion_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ProcesarAceptacionRechazo">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ProcesarAceptacionRechazo" message="tns:IWSCFDI33_ProcesarAceptacionRechazo_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ProcesarAceptacionRechazoResponse" message="tns:IWSCFDI33_ProcesarAceptacionRechazo_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="CancelarCFDIConValidacion">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/CancelarCFDIConValidacion" message="tns:IWSCFDI33_CancelarCFDIConValidacion_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/CancelarCFDIConValidacionResponse" message="tns:IWSCFDI33_CancelarCFDIConValidacion_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarComprobantesRelacionados">
+      <wsdl:input wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarComprobantesRelacionados" message="tns:IWSCFDI33_ConsultarComprobantesRelacionados_InputMessage" />
+      <wsdl:output wsaw:Action="http://tempuri.org/IWSCFDI33/ConsultarComprobantesRelacionadosResponse" message="tns:IWSCFDI33_ConsultarComprobantesRelacionados_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="soapHttpEndpoint" type="tns:IWSCFDI33">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="TimbrarCFDI">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/TimbrarCFDI" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelarCFDI">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/CancelarCFDI" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelacionAsincrona">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/CancelacionAsincrona" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EstatusCancelacionAsincrona">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/EstatusCancelacionAsincrona" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerPDF">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ObtenerPDF" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerAcuseEnvio">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ObtenerAcuseEnvio" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerAcuseCancelacion">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ObtenerAcuseCancelacion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CambiarPassword">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/CambiarPassword" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarComplementoTimbre">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarComplementoTimbre" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarTimbrePorReferencia">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarTimbrePorReferencia" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarTimbrePorSello">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarTimbrePorSello" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarCreditos">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarCreditos" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarComprobantes">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarComprobantes" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ValidarRFC">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ValidarRFC" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerPeticionesPendientesCancelacion">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ObtenerPeticionesPendientesCancelacion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ProcesarAceptacionRechazo">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ProcesarAceptacionRechazo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelarCFDIConValidacion">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/CancelarCFDIConValidacion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarComprobantesRelacionados">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarComprobantesRelacionados" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="soapHttpEndpointHttps" type="tns:IWSCFDI33">
+    <wsp:PolicyReference URI="#soapHttpEndpointHttps_policy" />
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="TimbrarCFDI">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/TimbrarCFDI" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelarCFDI">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/CancelarCFDI" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelacionAsincrona">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/CancelacionAsincrona" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EstatusCancelacionAsincrona">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/EstatusCancelacionAsincrona" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerPDF">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ObtenerPDF" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerAcuseEnvio">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ObtenerAcuseEnvio" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerAcuseCancelacion">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ObtenerAcuseCancelacion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CambiarPassword">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/CambiarPassword" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarComplementoTimbre">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarComplementoTimbre" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarTimbrePorReferencia">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarTimbrePorReferencia" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarTimbrePorSello">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarTimbrePorSello" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarCreditos">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarCreditos" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarComprobantes">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarComprobantes" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ValidarRFC">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ValidarRFC" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ObtenerPeticionesPendientesCancelacion">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ObtenerPeticionesPendientesCancelacion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ProcesarAceptacionRechazo">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ProcesarAceptacionRechazo" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CancelarCFDIConValidacion">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/CancelarCFDIConValidacion" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ConsultarComprobantesRelacionados">
+      <soap:operation soapAction="http://tempuri.org/IWSCFDI33/ConsultarComprobantesRelacionados" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="WSCFDI33">
+    <wsdl:port name="soapHttpEndpoint" binding="tns:soapHttpEndpoint">
+      <soap:address location="http://www.fel.mx/WSTimbrado33/WSCFDI33.svc" />
+    </wsdl:port>
+    <wsdl:port name="soapHttpEndpointHttps" binding="tns:soapHttpEndpointHttps">
+      <soap:address location="https://www.fel.mx/WSTimbrado33/WSCFDI33.svc" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

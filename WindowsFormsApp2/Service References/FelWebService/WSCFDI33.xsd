@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="http://schemas.datacontract.org/2004/07/TES.TFD.V33.Negocios" elementFormDefault="qualified" targetNamespace="http://schemas.datacontract.org/2004/07/TES.TFD.V33.Negocios" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:complexType name="RespuestaTFD33">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="CodigoConfirmacion" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="CodigoRespuesta" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="CreditosRestantes" type="xs:int" />
+      <xs:element minOccurs="0" name="MensajeError" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="MensajeErrorDetallado" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OperacionExitosa" type="xs:boolean" />
+      <xs:element minOccurs="0" name="PDFResultado" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Timbre" nillable="true" type="tns:Timbre33" />
+      <xs:element minOccurs="0" name="XMLResultado" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RespuestaTFD33" nillable="true" type="tns:RespuestaTFD33" />
+  <xs:complexType name="Timbre33">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Estado" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FechaTimbrado" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="NumeroCertificadoSAT" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="SelloCFD" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="SelloSAT" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="UUID" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="Timbre33" nillable="true" type="tns:Timbre33" />
+  <xs:complexType name="RespuestaCancelacion">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="DetallesCancelacion" nillable="true" type="tns:ArrayOfDetalleCancelacion" />
+      <xs:element minOccurs="0" name="MensajeError" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="MensajeErrorDetallado" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OperacionExitosa" type="xs:boolean" />
+      <xs:element minOccurs="0" name="XMLAcuse" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RespuestaCancelacion" nillable="true" type="tns:RespuestaCancelacion" />
+  <xs:complexType name="ArrayOfDetalleCancelacion">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="DetalleCancelacion" nillable="true" type="tns:DetalleCancelacion" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfDetalleCancelacion" nillable="true" type="tns:ArrayOfDetalleCancelacion" />
+  <xs:complexType name="DetalleCancelacion">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="CodigoResultado" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="MensajeResultado" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="UUID" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="DetalleCancelacion" nillable="true" type="tns:DetalleCancelacion" />
+  <xs:complexType name="RespuestaCancelacionAsincrona">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="DetallesCancelacion" nillable="true" type="tns:ArrayOfDetalleCancelacion" />
+      <xs:element minOccurs="0" name="MensajeError" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OperacionExitosa" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Referencia" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RespuestaCancelacionAsincrona" nillable="true" type="tns:RespuestaCancelacionAsincrona" />
+  <xs:complexType name="RespuestaEstatusCancelacionAsincrona">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Estatus" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="MensajeError" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OperacionExitosa" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Referencia" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="XMLAcuse" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RespuestaEstatusCancelacionAsincrona" nillable="true" type="tns:RespuestaEstatusCancelacionAsincrona" />
+  <xs:complexType name="RespuestaCreditos">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="MensajeError" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OperacionExitosa" type="xs:boolean" />
+      <xs:element minOccurs="0" name="Paquetes" nillable="true" type="tns:ArrayOfDetallesPaqueteCreditos" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RespuestaCreditos" nillable="true" type="tns:RespuestaCreditos" />
+  <xs:complexType name="ArrayOfDetallesPaqueteCreditos">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="DetallesPaqueteCreditos" nillable="true" type="tns:DetallesPaqueteCreditos" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfDetallesPaqueteCreditos" nillable="true" type="tns:ArrayOfDetallesPaqueteCreditos" />
+  <xs:complexType name="DetallesPaqueteCreditos">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="EnUso" type="xs:boolean" />
+      <xs:element minOccurs="0" name="FechaActivacion" nillable="true" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="FechaVencimiento" nillable="true" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="Paquete" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="Timbres" type="xs:int" />
+      <xs:element minOccurs="0" name="TimbresRestantes" type="xs:int" />
+      <xs:element minOccurs="0" name="TimbresUsados" type="xs:int" />
+      <xs:element minOccurs="0" name="Vigente" type="xs:boolean" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="DetallesPaqueteCreditos" nillable="true" type="tns:DetallesPaqueteCreditos" />
+  <xs:complexType name="RespuestaReporte">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="ListaComprobantes" nillable="true" type="tns:ArrayOfRegistroTimbre" />
+      <xs:element minOccurs="0" name="MensajeError" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="OperacionExitosa" type="xs:boolean" />
+      <xs:element minOccurs="0" name="TotalComprobantesPeriodo" type="xs:int" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RespuestaReporte" nillable="true" type="tns:RespuestaReporte" />
+  <xs:complexType name="ArrayOfRegistroTimbre">
+    <xs:sequence>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="RegistroTimbre" nillable="true" type="tns:RegistroTimbre" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="ArrayOfRegistroTimbre" nillable="true" type="tns:ArrayOfRegistroTimbre" />
+  <xs:complexType name="RegistroTimbre">
+    <xs:sequence>
+      <xs:element minOccurs="0" name="Estado" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="FechaTimbrado" type="xs:dateTime" />
+      <xs:element minOccurs="0" name="NoFila" type="xs:int" />
+      <xs:element minOccurs="0" name="RFCEmisor" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="RFCReceptor" nillable="true" type="xs:string" />
+      <xs:element minOccurs="0" name="UUID" nillable="true" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="RegistroTimbre" nillable="true" type="tns:RegistroTimbre" />
+</xs:schema>

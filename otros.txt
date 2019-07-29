@@ -1,0 +1,12 @@
+Forma de pago
+
+MetodoDePago
+
+
+RegimenFiscal //Siempre el mismo //Ingreso
+UsoCFDI //Tabla facturas
+
+
+
+ClaveProductosYServicios // Tabla Articulos aquí // Buscar con clave unidad
+
