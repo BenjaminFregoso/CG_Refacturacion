@@ -44,3 +44,15 @@ C:\Users\User\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp
 C:\Users\User\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.csproj.CopyComplete
 C:\Users\User\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.exe
 C:\Users\User\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.pdb
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\bin\Debug\WindowsFormsApp2.exe.config
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\bin\Debug\WindowsFormsApp2.exe
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\bin\Debug\WindowsFormsApp2.pdb
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\bin\Debug\diCrSysPKINet.dll
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.csprojAssemblyReference.cache
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.Devolucion.resources
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.Properties.Resources.resources
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.csproj.GenerateResource.cache
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.csproj.CoreCompileInputs.cache
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.csproj.CopyComplete
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.exe
+C:\Users\MAINPC\Documents\Refacturacion\WindowsFormsApp2\obj\Debug\WindowsFormsApp2.pdb

@@ -1560,7 +1560,7 @@ namespace WindowsFormsApp2
                     //SqlDataReader lector;
 
                     //NOTA DE CREDITO ################################################################
-
+                    /*
                     cmd.CommandText = "INSERT INTO dbo.Facturas([Numero],[Fecha],[Cuenta],[Nombre],[Domicilio],[Interior],[Exterior],[Colonia],[Ciudad],[Estado],[CP],[Correo],[Telefono],[RFC],[Operacion],[Importe],[Descuento],[Porcentaje],[Subtotal],[IVA],[Total],[Letra],[TotalCFDI],[UsoCFDI],[FacturaNoGenerica],[UUID],[Observaciones],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + numOp + "',@FechaHoy,'" + cuenta + "','" + nombre + "',null,null,null,null,null,null,null,'" + email + "','" + telefono + "','" + RFCAnterior + "','" + operaci + "','" + importe + "','" + Descuento + "','" + porcentaje + "','" + Subtotal + "','" + IVA + "','" + Total + "','" + totalletras + "',null,'" + usoCFDII + "',null,null,null,null,null);";
                     cmd.Parameters.Add("@FechaHoy", SqlDbType.Date).Value = dateTimePicker1.Value;
                     cmd.ExecuteNonQuery();
@@ -1579,7 +1579,7 @@ namespace WindowsFormsApp2
                         //En caso de que no se haga la factura se borra el registro
                         cmd.CommandText = "delete from dbo.Facturas where Numero = '" + numOp + "'";
                     }
-
+                    */
                     //####################################-----------------------------------------
 
                     numOp = encontrarConsecutivo(numOpFac, operaci, "F");
