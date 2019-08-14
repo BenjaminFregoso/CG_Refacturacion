@@ -2140,7 +2140,7 @@ namespace WindowsFormsApp2
                             oConcepto.NoIdentificacion = codigoArticulo;
                             oConcepto.Unidad = "0"; //Por default
                             oConcepto.Descripcion = descripcion;
-                            oConcepto.ValorUnitario = Math.Round(valorUni / 1.16m, 2);
+                            oConcepto.ValorUnitario = Math.Round((valorUni - descuento) / 1.16m, 2);
 
                             if (descuento == 0)
                             {
@@ -2151,8 +2151,8 @@ namespace WindowsFormsApp2
                                 oConcepto.Descuento = Math.Round(descuento / 1.16m, 2);
                             }
 
-                            oConcepto.Importe = Math.Round((valorUni / 1.16m) * cantidad - (descuento * cantidad), 2);
-                            totaltotal += Math.Round((valorUni / 1.16m) * cantidad - (descuento * cantidad), 2);
+                            oConcepto.Importe = Math.Round((( valorUni - descuento )/ 1.16m) * cantidad, 2);
+                            totaltotal += Math.Round(((valorUni - descuento) / 1.16m) * cantidad , 2);
 
                             ComprobanteConceptoImpuestosTraslado oTraslados = new ComprobanteConceptoImpuestosTraslado();
                             ComprobanteConceptoImpuestos oImpuestos = new ComprobanteConceptoImpuestos();
