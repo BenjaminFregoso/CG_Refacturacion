@@ -1558,17 +1558,18 @@ namespace WindowsFormsApp2
                     cn.Open();
                     SqlCommand cmd = cn.CreateCommand();
                     //SqlDataReader lector;
-
+                    
                     //NOTA DE CREDITO ################################################################
-                    /*
+                    
                     cmd.CommandText = "INSERT INTO dbo.Facturas([Numero],[Fecha],[Cuenta],[Nombre],[Domicilio],[Interior],[Exterior],[Colonia],[Ciudad],[Estado],[CP],[Correo],[Telefono],[RFC],[Operacion],[Importe],[Descuento],[Porcentaje],[Subtotal],[IVA],[Total],[Letra],[TotalCFDI],[UsoCFDI],[FacturaNoGenerica],[UUID],[Observaciones],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + numOp + "',@FechaHoy,'" + cuenta + "','" + nombre + "',null,null,null,null,null,null,null,'" + email + "','" + telefono + "','" + RFCAnterior + "','" + operaci + "','" + importe + "','" + Descuento + "','" + porcentaje + "','" + Subtotal + "','" + IVA + "','" + Total + "','" + totalletras + "',null,'" + usoCFDII + "',null,null,null,null,null);";
                     cmd.Parameters.Add("@FechaHoy", SqlDbType.Date).Value = dateTimePicker1.Value;
                     cmd.ExecuteNonQuery();
-
+                    
                     // TIMBRAR #######################################################################
                     timbrarNotaCred();
-
+                    
                     //Actualizar SQL #################################################################
+                    facturaOK = 1;
                     if (facturaOK == 0)
                     {
                         cmd.CommandText = "update dbo.Facturas set UUID = '" + UUIDNUEVO + "', UUIDRELACIONADO = '" + UUIDRELACIONADO + "', FormaPago ='" + formaPagoStr + "', MetodoPago = '" + MetodoPago.ToString() + "' , Observaciones= '" + observaciones + "' where Numero = '" + numOp + "' ";
@@ -1579,7 +1580,7 @@ namespace WindowsFormsApp2
                         //En caso de que no se haga la factura se borra el registro
                         cmd.CommandText = "delete from dbo.Facturas where Numero = '" + numOp + "'";
                     }
-                    */
+                    
                     //####################################-----------------------------------------
 
                     numOp = encontrarConsecutivo(numOpFac, operaci, "F");
@@ -2118,17 +2119,17 @@ namespace WindowsFormsApp2
                             valorUni = Convert.ToDecimal(row[0].Cells[7].Value);
                             descuento = Convert.ToDecimal(row[0].Cells[9].Value);
                             importe = Convert.ToDecimal(row[0].Cells[17].Value);
-
                             this.articulosTableAdapter.Fill(this.dbSIADataSetArt.Articulos, codigoArticulo);
                             foreach (DataRow ro in this.dbSIADataSetArt.Articulos)
                             {
-                                if (ro[3] == null)
+                                if (ro[3] != null)
                                 {
                                     claveProdServ = (ro[3].ToString());
                                 }
                                 else
                                 {
-                                    claveProdServ = "01010101";
+                                    MessageBox.Show("Este articulo no tiene clave de productos y servicios", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    claveProdServ = null;
                                 }
 
                             }
