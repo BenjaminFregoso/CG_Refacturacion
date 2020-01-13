@@ -2265,10 +2265,11 @@ namespace WindowsFormsApp2.dbSIADataFactTableAdapters {
                 "A , 0) END AS TOTALVENTA, CASE WHEN Substring(Numero , 12 , 1) = \'E\' THEN \'Cambi" +
                 "os\' WHEN Substring(Numero , 12 , 1) = \'A\' THEN \'A cuenta\' WHEN SUBSTRING(Numero " +
                 ", 12 , 1) = \'D\' THEN \'Cancelacion\' WHEN Substring(Numero , 12 , 1) = \'F\' THEN \'R" +
-                "e Factura\' WHEN Substring(Numero , 12 , 2) = \'NC\' THEN \'Nota\' WHEN Substring(Num" +
-                "ero , 12 , 3) = \'DEV\' THEN \'Devolución\' ELSE \'Factura\' END AS Documento, (SELECT" +
-                " TOTAL FROM Ventas WHERE (OPERACION = @NumOperacion)) AS TOTALGLOBAL, FormaPago," +
-                " MetodoPago FROM Facturas WHERE (Numero = @Numero)";
+                "e factura\' WHEN Substring(Numero , 12 , 2) = \'NC\' THEN \'Nota\' WHEN Substring(Num" +
+                "ero , 12 , 3) = \'DEV\' THEN \'Devolución\' WHEN Substring(Numero , 12 , 2) = \'FC\' T" +
+                "HEN \'Cancelada\' ELSE \'Factura\' END AS Documento, (SELECT TOTAL FROM Ventas WHERE" +
+                " (OPERACION = @NumOperacion)) AS TOTALGLOBAL, FormaPago, MetodoPago FROM Factura" +
+                "s WHERE (Numero = @Numero)";
             this._adapter.InsertCommand.CommandType = global::System.Data.CommandType.Text;
             this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Numero", global::System.Data.SqlDbType.VarChar, 0, global::System.Data.ParameterDirection.Input, 0, 0, "Numero", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Fecha", global::System.Data.SqlDbType.DateTime, 0, global::System.Data.ParameterDirection.Input, 0, 0, "Fecha", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
@@ -2351,11 +2352,11 @@ namespace WindowsFormsApp2.dbSIADataFactTableAdapters {
                 "l IS NULL THEN Total ELSE Subtotal + ISNULL(IVA , 0) END AS TOTALVENTA, CASE WHE" +
                 "N Substring(Numero , 12 , 1) = \'E\' THEN \'Cambios\' WHEN Substring(Numero , 12 , 1" +
                 ") = \'A\' THEN \'A cuenta\' WHEN SUBSTRING(Numero , 12 , 1) = \'D\' THEN \'Cancelacion\'" +
-                " WHEN Substring(Numero , 12 , 1) = \'F\' THEN \'Re Factura\' WHEN Substring(Numero ," +
+                " WHEN Substring(Numero , 12 , 1) = \'F\' THEN \'Re factura\' WHEN Substring(Numero ," +
                 " 12 , 2) = \'NC\' THEN \'Nota\' WHEN Substring(Numero , 12 , 3) = \'DEV\' THEN \'Devolu" +
-                "ción\' ELSE \'Factura\' END AS Documento, (SELECT TOTAL FROM Ventas WHERE (OPERACIO" +
-                "N = @NumOperacion)) AS TOTALGLOBAL, FormaPago, MetodoPago FROM Facturas WHERE (N" +
-                "umero = @Numero)";
+                "ción\' WHEN Substring(Numero , 12 , 2) = \'FC\' THEN \'Cancelada\' ELSE \'Factura\' END" +
+                " AS Documento, (SELECT TOTAL FROM Ventas WHERE (OPERACION = @NumOperacion)) AS T" +
+                "OTALGLOBAL, FormaPago, MetodoPago FROM Facturas WHERE (Numero = @Numero)";
             this._adapter.UpdateCommand.CommandType = global::System.Data.CommandType.Text;
             this._adapter.UpdateCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Numero", global::System.Data.SqlDbType.VarChar, 0, global::System.Data.ParameterDirection.Input, 0, 0, "Numero", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._adapter.UpdateCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Fecha", global::System.Data.SqlDbType.DateTime, 0, global::System.Data.ParameterDirection.Input, 0, 0, "Fecha", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
@@ -2464,7 +2465,7 @@ namespace WindowsFormsApp2.dbSIADataFactTableAdapters {
             this._commandCollection[0].Connection = this.Connection;
             this._commandCollection[0].CommandText = @"SELECT        Numero, Fecha, Cuenta, Nombre, Domicilio, Interior, Exterior, Colonia, Ciudad, Estado, CP, Correo, Telefono, RFC, Operacion, Importe, Descuento, Porcentaje, Subtotal, IVA, Total, Letra, UsoCFDI, 
                          FacturaNoGenerica, UUID, Observaciones, UUIDRelacionado, UUIDCancelado, CASE WHEN subtotal IS NULL THEN Total ELSE Subtotal + ISNULL(IVA, 0) END AS TOTALVENTA, CASE WHEN Substring(Numero, 12, 1) = 'E' THEN 'Cambios' WHEN Substring(Numero, 12, 1) = 'A' THEN 'A cuenta' WHEN SUBSTRING(Numero, 12, 1) 
-                         = 'D' THEN 'Cancelacion' WHEN Substring(Numero, 12, 1) = 'F' THEN 'Re Factura' WHEN Substring(Numero, 12, 2) = 'NC' THEN 'Nota' WHEN Substring(Numero, 12, 3) = 'DEV' THEN 'Devolución' ELSE 'Factura' END AS Documento,
+                         = 'D' THEN 'Cancelacion' WHEN Substring(Numero, 12, 1) = 'F' THEN 'Re factura' WHEN Substring(Numero, 12, 2) = 'NC' THEN 'Nota' WHEN Substring(Numero, 12, 3) = 'DEV' THEN 'Devolución' WHEN Substring(Numero, 12, 2) = 'FC' THEN 'Cancelada' ELSE 'Factura' END AS Documento,
                              (SELECT        TOTAL
                                FROM            Ventas
                                WHERE        (OPERACION = @NumOperacion)) AS TOTALGLOBAL, FormaPago, MetodoPago
@@ -2503,14 +2504,14 @@ WHERE        (Operacion = @NumOperacion)";
             this._commandCollection[3].CommandText = @"SELECT        Numero, Fecha, Cuenta, Nombre, Domicilio, Interior, Exterior, Colonia, Ciudad, Estado, CP, Correo, Telefono, RFC, Operacion, Importe, Descuento, Porcentaje, 
                          Subtotal, IVA, Total, Letra, UsoCFDI, FacturaNoGenerica, UUID, Observaciones, UUIDRelacionado, UUIDCancelado, CASE WHEN subtotal IS NULL 
                          THEN Total ELSE Subtotal + ISNULL(IVA, 0) END AS TOTALVENTA, CASE WHEN Substring(Numero, 12, 1) = 'E' THEN 'Cambios' WHEN Substring(Numero, 12, 1) = 'A' THEN 'A cuenta' WHEN SUBSTRING(Numero, 12, 1) 
-                         = 'D' THEN 'Cancelacion' WHEN Substring(Numero, 12, 1) = 'F' THEN 'Re Factura' WHEN Substring(Numero, 12, 2) = 'NC' THEN 'Nota' WHEN Substring(Numero, 12, 3) = 'DEV' THEN 'Devolución' ELSE 'Factura' END AS Documento,
+                         = 'D' THEN 'Cancelacion' WHEN Substring(Numero, 12, 1) = 'F' THEN 'Re Factura' WHEN Substring(Numero, 12, 2) = 'NC' THEN 'Nota' WHEN Substring(Numero, 12, 3) = 'DEV' THEN 'Devolución'  WHEN Substring(Numero, 13, 2) = 'FC' THEN 'Cancelada' ELSE 'Factura' END AS Documento,
                              (SELECT        TOTAL
                                FROM            TLAJO.dbSIA.dbo.Ventas AS Ventas_1
                                WHERE        (OPERACION = @NumOperacion)) AS TOTALGLOBAL, FormaPago, MetodoPago
 FROM            TLAJO.dbSIA.dbo.Facturas AS Facturas_1
 WHERE        (Operacion = @NumOperacion)";
             this._commandCollection[3].CommandType = global::System.Data.CommandType.Text;
-            this._commandCollection[3].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@NumOperacion", global::System.Data.SqlDbType.Variant, 1024, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
+            this._commandCollection[3].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@NumOperacion", global::System.Data.SqlDbType.VarChar, 12, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -2556,7 +2557,7 @@ WHERE        (Operacion = @NumOperacion)";
         public virtual int FillByATQ(dbSIADataFact.FacturasDataTable dataTable, object NumOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[1];
             if ((NumOperacion == null)) {
-                throw new global::System.ArgumentNullException("NumOperacion");
+                this.Adapter.SelectCommand.Parameters[0].Value = global::System.DBNull.Value;
             }
             else {
                 this.Adapter.SelectCommand.Parameters[0].Value = ((object)(NumOperacion));
@@ -2575,7 +2576,7 @@ WHERE        (Operacion = @NumOperacion)";
         public virtual dbSIADataFact.FacturasDataTable GetDataByATQ(object NumOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[1];
             if ((NumOperacion == null)) {
-                throw new global::System.ArgumentNullException("NumOperacion");
+                this.Adapter.SelectCommand.Parameters[0].Value = global::System.DBNull.Value;
             }
             else {
                 this.Adapter.SelectCommand.Parameters[0].Value = ((object)(NumOperacion));
@@ -2592,7 +2593,7 @@ WHERE        (Operacion = @NumOperacion)";
         public virtual int FillByIXTLA(dbSIADataFact.FacturasDataTable dataTable, object NumOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[2];
             if ((NumOperacion == null)) {
-                throw new global::System.ArgumentNullException("NumOperacion");
+                this.Adapter.SelectCommand.Parameters[0].Value = global::System.DBNull.Value;
             }
             else {
                 this.Adapter.SelectCommand.Parameters[0].Value = ((object)(NumOperacion));
@@ -2611,7 +2612,7 @@ WHERE        (Operacion = @NumOperacion)";
         public virtual dbSIADataFact.FacturasDataTable GetDataByIXTLA(object NumOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[2];
             if ((NumOperacion == null)) {
-                throw new global::System.ArgumentNullException("NumOperacion");
+                this.Adapter.SelectCommand.Parameters[0].Value = global::System.DBNull.Value;
             }
             else {
                 this.Adapter.SelectCommand.Parameters[0].Value = ((object)(NumOperacion));
@@ -2625,13 +2626,13 @@ WHERE        (Operacion = @NumOperacion)";
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, false)]
-        public virtual int FillByTLAJO(dbSIADataFact.FacturasDataTable dataTable, object NumOperacion) {
+        public virtual int FillByTLAJO(dbSIADataFact.FacturasDataTable dataTable, string NumOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[3];
             if ((NumOperacion == null)) {
                 throw new global::System.ArgumentNullException("NumOperacion");
             }
             else {
-                this.Adapter.SelectCommand.Parameters[0].Value = ((object)(NumOperacion));
+                this.Adapter.SelectCommand.Parameters[0].Value = ((string)(NumOperacion));
             }
             if ((this.ClearBeforeFill == true)) {
                 dataTable.Clear();
@@ -2644,13 +2645,13 @@ WHERE        (Operacion = @NumOperacion)";
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Select, false)]
-        public virtual dbSIADataFact.FacturasDataTable GetDataByTLAJO(object NumOperacion) {
+        public virtual dbSIADataFact.FacturasDataTable GetDataByTLAJO(string NumOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[3];
             if ((NumOperacion == null)) {
                 throw new global::System.ArgumentNullException("NumOperacion");
             }
             else {
-                this.Adapter.SelectCommand.Parameters[0].Value = ((object)(NumOperacion));
+                this.Adapter.SelectCommand.Parameters[0].Value = ((string)(NumOperacion));
             }
             dbSIADataFact.FacturasDataTable dataTable = new dbSIADataFact.FacturasDataTable();
             this.Adapter.Fill(dataTable);

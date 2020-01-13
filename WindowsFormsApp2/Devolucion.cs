@@ -30,7 +30,7 @@ namespace WindowsFormsApp2
         static private string pathxATQ = @"\\192.168.1.2\Sistemas\Sistemas\CFD\Factura3.3\Factura3.3\bin\Debug\Factura\";
         static private string pathxIXT = @"\\192.168.2.2\Sistemas\Sistemas\CFD\Factura3.3\Factura3.3\bin\Debug\Factura\";
         static private string pathxTLA = @"\\192.168.3.2\Sistemas\Sistemas\CFD\Factura3.3\Factura3.3\bin\Debug\Factura\";
-        
+        /*
         //REALES
         static string pathCer = @"\\192.168.0.2\Sistemas\Sistemas\Refacturacion\Sellos\00001000000203050906.cer";
         static string pathKey = @"\\192.168.0.2\Sistemas\Sistemas\Refacturacion\Sellos\CRE840310TC6_1302151633S.key";
@@ -40,27 +40,32 @@ namespace WindowsFormsApp2
         //REALES
         String UsuarioFell = "CRE840310TC6";
         String ContraseñaFEll = "GuRgWjw$";
+        */
         
-        /*
         //PRUEBA
         static string pathCer = @"\\192.168.0.2\Sistemas\Sistemas\Refacturacion\Sellos\CertificadoFirmadoPM.cer";
         static string pathKey = @"\\192.168.0.2\Sistemas\Sistemas\Refacturacion\Sellos\LlavePkcs8PM.key";
+        static string pathPem = @"\\192.168.0.2\Sistemas\Sistemas\Refacturacion\Sellos\Archivo.pem";
         static string claverPrivada = "12345678a";
       
         //PRUEBA
         String UsuarioFell = "CRE840310D33";
         String ContraseñaFEll = "contRa$3na";
-        */
-       
+        
+
         
         decimal totald, descuentod, subtotald, ivaTotal, importeDevolucion;
         decimal totalNegativo, descuentoNegativo, subtotalNegativo;
-        int formaPago, opServer, facturaOK = 0;
+        int formaPago, opServer, facturaOK = 0, noRefactura = 0;
         string diaCarpeta, pathxDinamico;
         Double importe, Descuento, porcentaje, Subtotal, IVA, Total, auxformapago;
         string claveProdServ, numOpPathXMLFac, numOpPathXMLNota, MetodoPago, numOpSinCambios, importeGlobal;
         string from = "credito@casaguerrero.com.mx", to, pass = "credguerrero", subject = "Comercial del Retiro SA de CV", body = "";
         string operacion, fecha, operaci, cuenta, RFC, nombre, email, telefono, UUIDRELACIONADO, lugarExpedicion, sucursal, numOpCorreo;
+        string UUIDCANCELADO, UUID, numOp, numOpProd, totalaux, totalletras, observaciones, numOpNC, numOpFac, usoCFDII, usoCFDI, UUIDNUEVO;
+        string servidor, RFCAnterior, formaPagoStr;
+        bool tieneAbono = false;
+
 
         private void pictureBox5_Click(object sender, EventArgs e)
         {
@@ -105,8 +110,124 @@ namespace WindowsFormsApp2
 
         }
 
+        private void Facturar_Click(object sender, EventArgs e)
+        {
+            //1.200.1
+            //#################----------------------------------------------------- EN PROGRESO ---------------------------------------------
+            Cursor.Current = Cursors.WaitCursor;
+
+            //Datos
+            operaci = textOperacion.Text;
+            cuenta = textCuenta.Text;
+            RFC = textRFC.Text;
+            nombre = textNombre.Text;
+            email = textEmail.Text;
+            telefono = textTelefono.Text;
+
+            if (RFC is null || nombre is null || email is null || RFC == ""|| nombre == "" || email =="")
+            {
+                Cursor.Current = Cursors.Default;
+                MessageBox.Show("NECESITA LLENAR LOS DATOS RFC, NOMBRE Y EMAIL PARA FACTURAR ESTA OPERACIÓN", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else if (UUID != "" && UUID != null)
+            {
+                Cursor.Current = Cursors.Default;
+                MessageBox.Show("YA EXISTE UNA FACTURA CON ESTE NÚMERO DE OPERACIÓN", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                ButtonFacturar.Enabled = false;
+            }
+            else
+            {
+                //Datos necesarios
+                ButtonNota.Enabled = false;
+                buttonReFac.Enabled = false;
+                ButtonFacturar.Enabled = false;
+                timbreCreditoDataGridView.Rows[0].Selected = true;
+                //MOVTOS ############
+                DataGridViewSelectedRowCollection row = timbreCreditoDataGridView.SelectedRows;
+
+                if (timbreCreditoDataGridView.CurrentRow == null)
+                {
+                    //Uso CFDI
+                    if (checkOtro.Checked)
+                    {
+                        usoCFDII = comboOtro.SelectedItem.ToString();
+                    }
+                    else
+                    {
+                        if (checkG01.Checked)
+                        {
+                            usoCFDII = "G01";
+                        }
+                        if (checkG03.Checked)
+                        {
+                            usoCFDII = "G03";
+                        }
+                        if (checkP01.Checked)
+                        {
+                            usoCFDII = "P01";
+                        }
+                    }
+                    //Fecha
+                    dateTimePicker1.Format = DateTimePickerFormat.Custom;
+                    dateTimePicker1.CustomFormat = "yyyy-MM-dd H:mm:ss";
+                    fecha = dateTimePicker1.Text;
+
+                    //Conexion sql
+                    String servidor = GetServidor(opServer);
+                    SqlConnection cn = new SqlConnection(servidor);
+                    cn.Open();
+                    SqlCommand cmd = cn.CreateCommand();
+
+                    numOp = encontrarConsecutivo(numOpFac, operaci, "F");
+                    
+                    numOp = numOp.Replace("  ", " ");
+
+                    //FACTURA AL SQL ################################################################# NO tiene uuid relacionado, solo va el nuevo
+                    cmd.CommandText = "INSERT INTO dbo.Facturas([Numero],[Fecha],[Cuenta],[Nombre],[Domicilio],[Interior],[Exterior],[Colonia],[Ciudad],[Estado],[CP],[Correo],[Telefono],[RFC],[Operacion],[Importe],[Descuento],[Porcentaje],[Subtotal],[IVA],[Total],[Letra],[TotalCFDI],[UsoCFDI],[FacturaNoGenerica],[UUID],[Observaciones],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + numOp + "',@Fech,'" + cuenta + "','" + nombre + "',null,null,null,null,null,null,null,'" + email + "','" + telefono + "','" + RFC + "','" + operaci + "','" + importe + "','" + Descuento + "','" + porcentaje + "','" + Subtotal + "','" + IVA + "','" + Total + "','" + totalletras + "',null,'" + usoCFDII + "',null,null,null,null,null);";
+                    cmd.Parameters.Add("@Fech", SqlDbType.Date).Value = dateTimePicker1.Value;
+                    cmd.ExecuteNonQuery();
+
+                    timbrarFactura();
+
+
+                    if (facturaOK == 0)
+                    {
+                        //Actualizar SQL #################################################################
+                        cmd.CommandText = "update dbo.Facturas set UUID = '" + UUIDNUEVO + "', FormaPago ='" + formaPagoStr + "', MetodoPago = '" + MetodoPago.ToString() + "', Observaciones= '" + observaciones + "' where Numero = '" + numOp + "' ";
+                        cmd.ExecuteNonQuery();
+                    }
+                    else
+                    {
+                        //En caso de que no se haga la factura se borra el registro
+                        cmd.CommandText = "delete from dbo.Facturas where Numero = '" + numOp + "'";
+                        cmd.ExecuteNonQuery();
+                    }
+
+
+                    if (facturaOK == 0)
+                    {
+                        //Mover a relacionado#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+                        cmd.CommandText = "update dbo.Facturas set UUIDCANCELADO= '" + UUIDRELACIONADO + "', Numero = '"+ numOpSinCambios+"FC"+ "' where Numero = '" + numOpSinCambios + "' ";
+                        cmd.ExecuteNonQuery();
+                        cmd.CommandText = "update dbo.Facturas set Numero = '" + numOpSinCambios+ "' where Numero = '" + numOp + "' ";
+                        cmd.ExecuteNonQuery();
+                        cmd.CommandText = "DELETE FROM dbo.Facturas where Numero = '" + numOpSinCambios+"FC"+"' ";
+                        cmd.ExecuteNonQuery();
+                    }
+                }
+                else
+                {
+                    Cursor.Current = Cursors.Default;
+                    MessageBox.Show("NO SE PUEDE REFACTURAR POR QUE \nTIENE ABONOS O ENGANCHE YA FATURADOS", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                Cursor.Current = Cursors.Default;
+            }
+                
+        }
+
         private void Cancelar_Click(object sender, EventArgs e)
         {
+            //0.900.2
             //Hacer cancelacion de cualquier factura
             /*
               Public Class Form1
@@ -148,7 +269,7 @@ namespace WindowsFormsApp2
                 Next
                 End Sub
                 End Class
-            */
+            
 
             var result = MessageBox.Show("¿ESTA SEGURO DE QUE DESEA CANCELAR ESTA FACTURA?", "Cancelar Factura",
                                          MessageBoxButtons.YesNo,
@@ -200,7 +321,10 @@ namespace WindowsFormsApp2
             {
                 MessageBox.Show("LA FACTURA NO SE CANCELÓ", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
+            */
         }
+
+      
 
         private void pictureBox4_Click(object sender, EventArgs e)
         {
@@ -211,15 +335,6 @@ namespace WindowsFormsApp2
         {
             this.BackColor = Color.White;
         }
-
-        private void pictureBox2_Click_1(object sender, EventArgs e)
-        {
-            this.Close();
-        }
-        
-
-        string UUIDCANCELADO, UUID, numOp, numOpProd, totalaux, totalletras, observaciones, numOpNC, numOpFac, usoCFDII, usoCFDI, UUIDNUEVO;
-        string servidor, RFCAnterior, formaPagoStr;
 
         //Conexion al servidor app.config
         public String GetServidor(int op)
@@ -291,12 +406,11 @@ namespace WindowsFormsApp2
             e.Handled = e.KeyChar == Convert.ToChar(Keys.Space);
         }
 
-        //SELLAR
 
-       
+        //SELLAR
         static string Test_Mex_Sign_Data(string cadenaOriginal)
         {
-            //MAGIC CODE, DONT TOUCH
+            //CÓDIGO MAGICO, NO LO TOQUES
             string strData;
             StringBuilder sbPassword;
             StringBuilder sbPrivateKey;
@@ -305,47 +419,21 @@ namespace WindowsFormsApp2
             byte[] block;
             int keyBytes;
 
-            Console.WriteLine("\nSIGNING THE DATA...");
-
-            // Read in the private key from encrypted .key file
-            // (files need to be in the default working directory)
             string strKeyFile = pathKey;
-            // CAUTION: DO NOT hardcode production passwords!
             sbPassword = new StringBuilder(claverPrivada);
-            // Note that the key is read into a StringBuilder, not a string.
+            //StringBuilder no string
             sbPrivateKey = Rsa.ReadEncPrivateKey(strKeyFile, sbPassword.ToString());
             Debug.Assert(sbPrivateKey.Length > 0);
-
-            // How big is this key?
             keyBytes = Rsa.KeyBytes(sbPrivateKey.ToString());
             Debug.Assert(keyBytes > 0);
-            Console.WriteLine("Key length is {0} bits/{1} bytes", Rsa.KeyBits(sbPrivateKey.ToString()), keyBytes);
-
-            // Original SAT input string in Latin-1 format
             strData = cadenaOriginal; 
             //strData = "||2.0|A|1|2009-08-16T16:30:00|1|2009|ingreso|Una sola exhibición|350.00|5.25|397.25|ISP900909Q88|Industrias del Sur Poniente, S.A. de C.V.|Alvaro Obregón|37|3|Col. Roma Norte|México|Cuauhtémoc|Distrito Federal|México|06700|Pino Suarez|23|Centro|Monterrey|Monterrey|Nuevo Léon|México|95460|CAUR390312S87|Rosa María Calderón Uriegas|Topochico|52|Jardines del Valle|Monterrey|Monterrey|Nuevo León|México|95465|10|Caja|Vasos decorados|20.00|200|1|pieza|Charola metálica|150.00|150|IVA|15.00|52.50||";
-            //Console.WriteLine("Original Latin-1 string={0}", strData);
-            Console.WriteLine("# of characters in Latin-1 string  = {0}", strData.Length);
-
-            // Convert directly to a byte array using the System.Text.Encoding function
             b = System.Text.Encoding.UTF8.GetBytes(strData);
-            Console.WriteLine("# of bytes when converted to UTF-8 = {0}", b.Length);
-
-            // Encode this data ready for signing into an `Encoded Message For Signature' block
-            // using PKCS#1 v1.5 method and the MD5 hash algorithm.
             block = Rsa.EncodeMsgForSignature(keyBytes, b, HashAlgorithm.Sha256);
             Debug.Assert(block.Length > 0);
-            Console.WriteLine("Encoded Block=\n{0}", Cnv.ToHex(block));
-
-            // Now sign using the RSA private key
             block = Rsa.RawPrivate(block, sbPrivateKey.ToString());
             Debug.Assert(block.Length > 0);
-            // Display in hex format
-            Console.WriteLine("Signature in hex=\n{0}", Cnv.ToHex(block));
-            // Display in base64 format
-            Console.WriteLine("Signature in base64=\n{0}", System.Convert.ToBase64String(block));
             sello = System.Convert.ToBase64String(block);
-            // Clean up sensitive data (NB should do on error, too, in a real program)
             Wipe.String(sbPassword);
             Wipe.String(sbPrivateKey);
             Wipe.Data(block);
@@ -358,8 +446,9 @@ namespace WindowsFormsApp2
         private void buttonCorreo_Click(object sender, EventArgs e)
         {
             //Cargar datos de seleccionados
-            button1.Enabled = false;
+            ButtonNota.Enabled = false;
             buttonReFac.Enabled = false;
+            ButtonFacturar.Enabled = false;
 
             DataGridViewSelectedRowCollection row = facturasDataGridView.SelectedRows;
             numOpCorreo = row[0].Cells[4].Value.ToString();
@@ -399,8 +488,9 @@ namespace WindowsFormsApp2
         private void facturasDataGridView_MouseClick(object sender, MouseEventArgs e)
         {
             //Cargar datos de seleccionados
-            button1.Enabled = false;
+            ButtonNota.Enabled = false;
             buttonReFac.Enabled = false;
+            ButtonFacturar.Enabled = false;
             
             DataGridViewSelectedRowCollection row = facturasDataGridView.SelectedRows;
             textEmail.Text = row[0].Cells[14].Value.ToString();
@@ -411,8 +501,8 @@ namespace WindowsFormsApp2
         private void EnviarCorreo(string documentopdf_, string documentoxml_, string destinatario_)
         {
             
-            to = destinatario_;
-            //to = "sistemas2comret@outlook.com";
+            //to = destinatario_;
+            to = "sistemas2comret@outlook.com";
             using (SmtpClient protocoll = new SmtpClient("mail.casaguerrero.com.mx", 2525))
             {
                 MailMessage mensaje = new MailMessage(from, to, subject, body);
@@ -510,7 +600,7 @@ namespace WindowsFormsApp2
             ComprobanteEmisor oEmisor = new ComprobanteEmisor();
             oEmisor.RegimenFiscal = c_RegimenFiscal.Item601; //Siempre va este
             ComprobanteReceptor oReceptor = new ComprobanteReceptor();
-            
+            /*
             //REALES
 
             oEmisor.Rfc = "CRE840310TC6";
@@ -518,7 +608,8 @@ namespace WindowsFormsApp2
             //REALES
             oReceptor.Nombre = nombre;
             oReceptor.Rfc = RFC;
-           /*
+            */
+           
             //PRUEBA
             
             oEmisor.Rfc = "TES030201001";
@@ -527,7 +618,7 @@ namespace WindowsFormsApp2
             //PRUEBA
             oReceptor.Nombre = "temporal";
             oReceptor.Rfc = "TEST010203001";
-            */
+            
 
             //Asignar emisor y receptor
             oComprobante.Emisor = oEmisor;
@@ -741,7 +832,7 @@ namespace WindowsFormsApp2
         //CANCELACIO POR NEGATIVO
         private void cancelaNegativo()
         {
-            
+                
                 //Uso CFDI
                 if (checkOtro.Checked)
                 {
@@ -820,7 +911,7 @@ namespace WindowsFormsApp2
             }
             else
             {
-                button1.Enabled = false;
+                ButtonNota.Enabled = false;
                 buttonReFac.Enabled = false;
                 timbreCreditoDataGridView.Rows[0].Selected = true;
                 DataGridViewSelectedRowCollection row = timbreCreditoDataGridView.SelectedRows;
@@ -870,8 +961,8 @@ namespace WindowsFormsApp2
                     }
                     else
                     {
-                        //RFC = "TES030201001"; //RFC CRE
-                        RFC = "CRE840310TC6"; //RFC CRE
+                        RFC = "TES030201001"; //RFC TEST
+                        //RFC = "CRE840310TC6"; //RFC CRE
                         
                         numOp = encontrarConsecutivo(numOpNC, operaci, "NC");
                         numOp = numOp.Replace("  ", " ");
@@ -953,7 +1044,7 @@ namespace WindowsFormsApp2
 
 
                         Cursor.Current = Cursors.Default;
-                        labelInfo.Text = "CANCELACIÓN COMPLETA";
+                        labelInfo.Text = "NOTA DE CRÉDITO COMPLETA";
                     }
                     else
                     {
@@ -963,7 +1054,7 @@ namespace WindowsFormsApp2
                 else
                 {
                     Cursor.Current = Cursors.Default;
-                    labelInfo.Text = "NO SE PUEDE CANCELAR POR QUE \nTIENE ABONOS O ENGANCHE YA FATURADOS";
+                    labelInfo.Text = "NO SE PUEDE HACER UNA NOTA POR QUE \nTIENE ABONOS O ENGANCHE YA FATURADOS";
 
                 }
             }
@@ -1193,8 +1284,19 @@ namespace WindowsFormsApp2
         //BUSCAR FACTURA
         private void buttonBuscar_Click(object sender, EventArgs e)
         {
-            
-            
+
+            //PROGRAMAR VALIDAR NUMERO DE OPERACION ----------------------------------------------------------- 1.200.1
+            buttonReFac.Enabled = true;
+            ButtonNota.Enabled = true;
+            ButtonFacturar.Enabled = true;
+            buttonCorreo.Enabled = true;
+            textEmail.Text = null;
+            textNombre.Text = null;
+            textNumOp.Text = null;
+            textCuenta.Text = null;
+            textRFC.Text = null;
+            textTelefono.Text = null;
+
             textCuenta.Enabled = false;
             dateTimePicker1.Enabled = false;
 
@@ -1212,19 +1314,11 @@ namespace WindowsFormsApp2
 
             texttotal.Text = "TOTAL DE LA VENTA: ";
             labelInfo.Text = "";
-            buttonReFac.Enabled =true;
-            button1.Enabled = true;
             operacion = textOperacion.Text;
             
-            //IDENTIFICAR LUGAR 
-            if (operacion == "")
-            {
-                //labelInfo.Text = "RELLENE EL NÚMERO DE OPERACIÓN";
-            }
-            else
-            {
-                sucursal = operacion.Substring(4, 2);
-            }
+            
+            sucursal = operacion.Substring(4, 2);
+            
             
             if (sucursal == "01" || sucursal == "02" || sucursal == "03" || sucursal == "04" || sucursal == "05" || sucursal == "13" || sucursal == "14" || sucursal == "15" || sucursal == "19" || sucursal == "20")
             {
@@ -1233,7 +1327,7 @@ namespace WindowsFormsApp2
                     //GUADALAJARA
                     this.facturasTableAdapter.Fill(this.dbSIADataFact.Facturas, operacion);
                     this.det_VentTableAdapter.Fill(this.dbSIADataDetalles.Det_Vent, operacion);
-                    this.timbreCreditoTableAdapter.Fill(this.dbCreditoDataCredito.TimbreCredito, operacion);
+                    this.movtosTableAdapter.Fill(this.dbCreditoDataCredito.movtos, operacion);
                     lugarExpedicion = "44280";
                     pathxDinamico = pathxGDL;
                     opServer = 1;
@@ -1249,7 +1343,7 @@ namespace WindowsFormsApp2
                 //almacen = "02";//ATEQUIZA
                 this.facturasTableAdapter.FillByATQ(this.dbSIADataFact.Facturas, operacion);
                 this.det_VentTableAdapter.FillByATQ(this.dbSIADataDetalles.Det_Vent, operacion);
-                this.timbreCreditoTableAdapter.FillByATQ(this.dbCreditoDataCredito.TimbreCredito, operacion);
+                this.movtosTableAdapter.FillByATQ(this.dbCreditoDataCredito.movtos, operacion);
                     lugarExpedicion = "45850";
                     pathxDinamico = pathxATQ;
                     opServer = 2;
@@ -1265,7 +1359,7 @@ namespace WindowsFormsApp2
                 //almacen = "03"; //IXTLAHUACAN
                 this.facturasTableAdapter.FillByIXTLA(this.dbSIADataFact.Facturas, operacion);
                 this.det_VentTableAdapter.FillByIXTLA(this.dbSIADataDetalles.Det_Vent, operacion);
-                this.timbreCreditoTableAdapter.FillByIXTLA(this.dbCreditoDataCredito.TimbreCredito, operacion);
+                this.movtosTableAdapter.FillByIXTLA(this.dbCreditoDataCredito.movtos, operacion);
                     lugarExpedicion = "45860";
                     pathxDinamico = pathxIXT;
                     opServer = 3;
@@ -1281,7 +1375,7 @@ namespace WindowsFormsApp2
                 //almacen = "04"; //TLAJOMULCO
                 this.facturasTableAdapter.FillByTLAJO(this.dbSIADataFact.Facturas, operacion);
                 this.det_VentTableAdapter.FillByTLAJO(this.dbSIADataDetalles.Det_Vent, operacion);
-                this.timbreCreditoTableAdapter.FillByTLAJO(this.dbCreditoDataCredito.TimbreCredito, operacion);
+                this.movtosTableAdapter.FillByTLAJO(this.dbCreditoDataCredito.movtos, operacion);
                     lugarExpedicion = "45640";
                     pathxDinamico = pathxTLA;
                     opServer = 4;
@@ -1337,7 +1431,7 @@ namespace WindowsFormsApp2
             //MessageBox.Show("FECHA: " + diaCarpeta);
             if (Directory.Exists(pathxDinamico + diaCarpeta))
             {
-                MessageBox.Show("La carpeta ya existe : " + pathxDinamico + diaCarpeta);
+               // MessageBox.Show("La carpeta ya existe : " + pathxDinamico + diaCarpeta);
             }
             else
             {
@@ -1345,7 +1439,7 @@ namespace WindowsFormsApp2
                 {
 
                     Directory.CreateDirectory(pathxDinamico + diaCarpeta);
-                    MessageBox.Show("La carpeta se ha creado: " + pathxDinamico + diaCarpeta);
+                    //MessageBox.Show("La carpeta se ha creado: " + pathxDinamico + diaCarpeta); 
                 }
                 catch (Exception error)
                 {
@@ -1392,6 +1486,7 @@ namespace WindowsFormsApp2
                 //UUID ANTERIOR
                 UUIDRELACIONADO = row[0].Cells[25].Value.ToString();
                 UUID = UUIDRELACIONADO;
+                //MessageBox.Show("UUID: " + UUID);
                 importeGlobal = row[0].Cells[17].Value.ToString();
                 totald = Convert.ToDecimal(row[0].Cells[17].Value);
                 usoCFDI = row[0].Cells[23].Value.ToString();
@@ -1437,13 +1532,15 @@ namespace WindowsFormsApp2
                     texttotal.Text = "TOTAL DE LA FACTURA: "+importeGlobal;
                     
                     buttonReFac.Enabled = false;
-                    button1.Enabled = true;
+                    ButtonNota.Enabled = true;
                 }
                 else
                 {
                     Cursor.Current = Cursors.Default;
-                    labelInfo.Text = "NO EXISTEN FACTURAS CON ESE NUMERO \nDE OPERACION, POR FAVOR PROPORCIONE UN \nNUMERO DE OPERACION CORRECTO";
+                    labelInfo.Text = "NO EXISTE FACTURA GLOBAL CON ESE NUMERO \nDE OPERACION, POR FAVOR PROPORCIONE UN \nNUMERO DE OPERACION CORRECTO";
+                    ButtonFacturar.Enabled = false;
                     buttonReFac.Enabled = false;
+                    ButtonNota.Enabled = false;
                 }
 
             }
@@ -1460,6 +1557,7 @@ namespace WindowsFormsApp2
                     if (numOpNC.Contains("NC"))
                     {
                         salir = 1;
+                        noRefactura = 1;
                     }
                     else
                     {
@@ -1484,10 +1582,16 @@ namespace WindowsFormsApp2
                     if (numOpFac.Contains("F"))
                     {
                         salir = 1;
+                        noRefactura = 1;
                     }
                     else
                     {
                         numOpFac = numOp;
+                    }
+
+                    if (numOpFac.Contains("FC"))
+                    {
+                        noRefactura = 1;
                     }
                 }
             }
@@ -1496,6 +1600,21 @@ namespace WindowsFormsApp2
 
             }
             Cursor.Current = Cursors.Default;
+
+            if (noRefactura == 1)
+            {
+                ButtonFacturar.Enabled = false;
+                buttonReFac.Enabled = false;
+                ButtonNota.Enabled = false;
+
+            }
+            if(RFCAnterior != "XAXX010101000")
+            {
+                ButtonFacturar.Enabled = false;
+                buttonReFac.Enabled = false;
+                ButtonNota.Enabled = false;
+                labelInfo.Text = "ESTA OPERACIÓN TIENE RFC NOMINATIVO";
+            }
         }
 
         //REFACTURAR
@@ -1509,124 +1628,136 @@ namespace WindowsFormsApp2
             }
             else
             {
-                button1.Enabled = false;
+                ButtonNota.Enabled = false;
                 buttonReFac.Enabled = false;
                 timbreCreditoDataGridView.Rows[0].Selected = true;
                 DataGridViewSelectedRowCollection row = timbreCreditoDataGridView.SelectedRows;
-
-                if (timbreCreditoDataGridView.CurrentRow == null)
+                tieneAbono = false;
+                //1.300.1
+                if (timbreCreditoDataGridView.CurrentRow != null) //Revisar abonos para timbrar despues de facturar
                 {
-                    //Uso CFDI
-                    if (checkOtro.Checked)
-                    {
+                    tieneAbono = true;
+                }
 
-                        usoCFDII = comboOtro.SelectedItem.ToString();
-                    }
-                    else
-                    {
-                        if (checkG01.Checked)
-                        {
-                            usoCFDII = "G01";
-                        }
-                        if (checkG03.Checked)
-                        {
-                            usoCFDII = "G03";
-                        }
-                        if (checkP01.Checked)
-                        {
-                            usoCFDII = "P01";
-                        }
-                    }
-                    //Fecha
-                    dateTimePicker1.Format = DateTimePickerFormat.Custom;
-                    dateTimePicker1.CustomFormat = "yyyy-MM-dd H:mm:ss";
-                    fecha = dateTimePicker1.Text;
+                //Uso CFDI
+                if (checkOtro.Checked)
+                {
 
-                    //Datos
-                    operaci = textOperacion.Text;
-                    cuenta = textCuenta.Text;
-                    RFC = textRFC.Text;
-                    nombre = textNombre.Text;
-                    email = textEmail.Text;
-                    telefono = textTelefono.Text;
-
-                    numOp = encontrarConsecutivo(numOpNC, operaci, "NC");
-                    numOp = numOp.Replace("  ", " ");
-                    //Conexion sql
-                    String servidor = GetServidor(opServer);
-                    SqlConnection cn = new SqlConnection(servidor);
-                    cn.Open();
-                    SqlCommand cmd = cn.CreateCommand();
-                    //SqlDataReader lector;
-                    
-                    //NOTA DE CREDITO ################################################################
-                    
-                    cmd.CommandText = "INSERT INTO dbo.Facturas([Numero],[Fecha],[Cuenta],[Nombre],[Domicilio],[Interior],[Exterior],[Colonia],[Ciudad],[Estado],[CP],[Correo],[Telefono],[RFC],[Operacion],[Importe],[Descuento],[Porcentaje],[Subtotal],[IVA],[Total],[Letra],[TotalCFDI],[UsoCFDI],[FacturaNoGenerica],[UUID],[Observaciones],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + numOp + "',@FechaHoy,'" + cuenta + "','" + nombre + "',null,null,null,null,null,null,null,'" + email + "','" + telefono + "','" + RFCAnterior + "','" + operaci + "','" + importe + "','" + Descuento + "','" + porcentaje + "','" + Subtotal + "','" + IVA + "','" + Total + "','" + totalletras + "',null,'" + usoCFDII + "',null,null,null,null,null);";
-                    cmd.Parameters.Add("@FechaHoy", SqlDbType.Date).Value = dateTimePicker1.Value;
-                    cmd.ExecuteNonQuery();
-                    
-                    // TIMBRAR #######################################################################
-                    timbrarNotaCred();
-                    
-                    //Actualizar SQL #################################################################
-                    facturaOK = 1;
-                    if (facturaOK == 0)
-                    {
-                        cmd.CommandText = "update dbo.Facturas set UUID = '" + UUIDNUEVO + "', UUIDRELACIONADO = '" + UUIDRELACIONADO + "', FormaPago ='" + formaPagoStr + "', MetodoPago = '" + MetodoPago.ToString() + "' , Observaciones= '" + observaciones + "' where Numero = '" + numOp + "' ";
-                        cmd.ExecuteNonQuery();
-                    }
-                    else
-                    {
-                        //En caso de que no se haga la factura se borra el registro
-                        cmd.CommandText = "delete from dbo.Facturas where Numero = '" + numOp + "'";
-                    }
-                    
-                    //####################################-----------------------------------------
-
-                    numOp = encontrarConsecutivo(numOpFac, operaci, "F");
-                    numOp = numOp.Replace("  ", " ");
-                    //FACTURA AL SQL ################################################################# NO tiene uuid relacionado, solo va el nuevo
-                    cmd.CommandText = "INSERT INTO dbo.Facturas([Numero],[Fecha],[Cuenta],[Nombre],[Domicilio],[Interior],[Exterior],[Colonia],[Ciudad],[Estado],[CP],[Correo],[Telefono],[RFC],[Operacion],[Importe],[Descuento],[Porcentaje],[Subtotal],[IVA],[Total],[Letra],[TotalCFDI],[UsoCFDI],[FacturaNoGenerica],[UUID],[Observaciones],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + numOp + "',@Fech,'" + cuenta + "','" + nombre + "',null,null,null,null,null,null,null,'" + email + "','" + telefono + "','" + RFC + "','" + operaci + "','" + importe + "','" + Descuento + "','" + porcentaje + "','" + Subtotal + "','" + IVA + "','" + Total + "','" + totalletras + "',null,'" + usoCFDII + "',null,null,null,null,null);";
-                    cmd.Parameters.Add("@Fech", SqlDbType.Date).Value = dateTimePicker1.Value;
-                    cmd.ExecuteNonQuery();
-
-                    //TIMBRAR ########################################################################
-                    timbrarFactura();//Enviar correo al terminar factura
-
-
-                    if (facturaOK == 0)
-                    {
-                        //Actualizar SQL #################################################################
-                        cmd.CommandText = "update dbo.Facturas set UUID = '" + UUIDNUEVO + "', FormaPago ='" + formaPagoStr + "', MetodoPago = '" + MetodoPago.ToString() + "', Observaciones= '" + observaciones + "' where Numero = '" + numOp + "' ";
-                        cmd.ExecuteNonQuery();
-                    }
-                    else
-                    {
-                        //En caso de que no se haga la factura se borra el registro
-                        cmd.CommandText = "delete from dbo.Facturas where Numero = '" + numOp + "'";
-                    }
-
-
-                    if (facturaOK == 0){
-                        //Mover a relacionado#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
-                        cmd.CommandText = "update dbo.Facturas set UUIDCANCELADO= '" + UUIDRELACIONADO + "' where Numero = '" + numOpSinCambios + "' ";
-                        cmd.ExecuteNonQuery();
-                    }
-             
-                    if (totalNegativo > 0)
-                    {
-                        cancelaNegativo();//Enviar correo al terminar cancelación por negativos
-
-                    }
-
-                    labelInfo.Text = "RE FACTURACIÓN COMPLETA";
+                    usoCFDII = comboOtro.SelectedItem.ToString();
                 }
                 else
                 {
-                    labelInfo.Text = "NO SE PUEDE REFACTURAR POR QUE \nTIENE ABONOS O ENGANCHE YA FATURADOS ";
+                    if (checkG01.Checked)
+                    {
+                        usoCFDII = "G01";
+                    }
+                    if (checkG03.Checked)
+                    {
+                        usoCFDII = "G03";
+                    }
+                    if (checkP01.Checked)
+                    {
+                        usoCFDII = "P01";
+                    }
                 }
+                //Fecha
+                dateTimePicker1.Format = DateTimePickerFormat.Custom;
+                dateTimePicker1.CustomFormat = "yyyy-MM-dd H:mm:ss";
+                fecha = dateTimePicker1.Text;
+
+                //Datos
+                operaci = textOperacion.Text;
+                cuenta = textCuenta.Text;
+                RFC = textRFC.Text;
+                nombre = textNombre.Text;
+                email = textEmail.Text;
+                telefono = textTelefono.Text;
+
+                numOp = encontrarConsecutivo(numOpNC, operaci, "NC");
+                numOp = numOp.Replace("  ", " ");
+                //Conexion sql
+                String servidor = GetServidor(opServer);
+                SqlConnection cn = new SqlConnection(servidor);
+                cn.Open();
+                SqlCommand cmd = cn.CreateCommand();
+                //SqlDataReader lector;
+
+                //NOTA DE CREDITO ################################################################
+
+                cmd.CommandText = "INSERT INTO dbo.Facturas([Numero],[Fecha],[Cuenta],[Nombre],[Domicilio],[Interior],[Exterior],[Colonia],[Ciudad],[Estado],[CP],[Correo],[Telefono],[RFC],[Operacion],[Importe],[Descuento],[Porcentaje],[Subtotal],[IVA],[Total],[Letra],[TotalCFDI],[UsoCFDI],[FacturaNoGenerica],[UUID],[Observaciones],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + numOp + "',@FechaHoy,'" + cuenta + "','" + nombre + "',null,null,null,null,null,null,null,'" + email + "','" + telefono + "','" + RFCAnterior + "','" + operaci + "','" + importe + "','" + Descuento + "','" + porcentaje + "','" + Subtotal + "','" + IVA + "','" + Total + "','" + totalletras + "',null,'" + usoCFDII + "',null,null,null,null,null);";
+                cmd.Parameters.Add("@FechaHoy", SqlDbType.Date).Value = dateTimePicker1.Value;
+                cmd.ExecuteNonQuery();
+
+                // TIMBRAR #######################################################################
+                timbrarNotaCred();
+
+                //Actualizar SQL #################################################################
+                facturaOK = 1;
+                if (facturaOK == 0)
+                {
+                    cmd.CommandText = "update dbo.Facturas set UUID = '" + UUIDNUEVO + "', UUIDRELACIONADO = '" + UUIDRELACIONADO + "', FormaPago ='" + formaPagoStr + "', MetodoPago = '" + MetodoPago.ToString() + "' , Observaciones= '" + observaciones + "' where Numero = '" + numOp + "' ";
+                    cmd.ExecuteNonQuery();
+                }
+                else
+                {
+                    //En caso de que no se haga la factura se borra el registro
+                    cmd.CommandText = "delete from dbo.Facturas where Numero = '" + numOp + "'";
+                }
+
+                //####################################-----------------------------------------
+
+                numOp = encontrarConsecutivo(numOpFac, operaci, "F");
+                numOp = numOp.Replace("  ", " ");
+                //FACTURA AL SQL ################################################################# NO tiene uuid relacionado, solo va el nuevo
+                cmd.CommandText = "INSERT INTO dbo.Facturas([Numero],[Fecha],[Cuenta],[Nombre],[Domicilio],[Interior],[Exterior],[Colonia],[Ciudad],[Estado],[CP],[Correo],[Telefono],[RFC],[Operacion],[Importe],[Descuento],[Porcentaje],[Subtotal],[IVA],[Total],[Letra],[TotalCFDI],[UsoCFDI],[FacturaNoGenerica],[UUID],[Observaciones],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + numOp + "',@Fech,'" + cuenta + "','" + nombre + "',null,null,null,null,null,null,null,'" + email + "','" + telefono + "','" + RFC + "','" + operaci + "','" + importe + "','" + Descuento + "','" + porcentaje + "','" + Subtotal + "','" + IVA + "','" + Total + "','" + totalletras + "',null,'" + usoCFDII + "',null,null,null,null,null);";
+                cmd.Parameters.Add("@Fech", SqlDbType.Date).Value = dateTimePicker1.Value;
+                cmd.ExecuteNonQuery();
+
+                //TIMBRAR ########################################################################
+                timbrarFactura();//Enviar correo al terminar factura
+
+
+                if (facturaOK == 0)
+                {
+                    //Actualizar SQL #################################################################
+                    cmd.CommandText = "update dbo.Facturas set UUID = '" + UUIDNUEVO + "', FormaPago ='" + formaPagoStr + "', MetodoPago = '" + MetodoPago.ToString() + "', Observaciones= '" + observaciones + "' where Numero = '" + numOp + "' ";
+                    cmd.ExecuteNonQuery();
+                }
+                else
+                {
+                    //En caso de que no se haga la factura se borra el registro
+                    cmd.CommandText = "delete from dbo.Facturas where Numero = '" + numOp + "'";
+                }
+
+
+                if (facturaOK == 0) {
+                    //Mover a relacionado#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#-#
+                    //1.200.1
+                    cmd.CommandText = "update dbo.Facturas set UUIDCANCELADO= '" + UUIDRELACIONADO + "', Numero = '" + numOpSinCambios + "FC" + "' where Numero = '" + numOpSinCambios + "' ";
+                    cmd.ExecuteNonQuery();
+                    cmd.CommandText = "update dbo.Facturas set Numero = '" + numOpSinCambios + "' where Numero = '" + numOp + "' ";
+                    cmd.ExecuteNonQuery();
+                }
+
+                if (totalNegativo > 0)
+                {
+                    cancelaNegativo();//Enviar correo al terminar cancelación por negativos
+
+                }
+                //1.300.1
+                if (tieneAbono == true)
+                {
+                    //TIMBRAR ABONOS
+                }
+                labelInfo.Text = "RE FACTURACIÓN COMPLETA";
             }
             Cursor.Current = Cursors.Default;
+        }
+
+        //TIMBRAR ABONOS Y ENGANCHE 1.300.1
+        private void TimbrarPagos()
+        {
+
         }
 
         //OBTENER CERTIFICADO
@@ -1716,7 +1847,7 @@ namespace WindowsFormsApp2
                 ComprobanteEmisor oEmisor = new ComprobanteEmisor();
                 oEmisor.RegimenFiscal = c_RegimenFiscal.Item601; //Siempre va este
                 ComprobanteReceptor oReceptor = new ComprobanteReceptor();
-                /*
+                
                 //PRUEBAS
                 oEmisor.Rfc = "TES030201001";
                 oEmisor.Nombre = "temporal";
@@ -1724,11 +1855,16 @@ namespace WindowsFormsApp2
                 //PRUEBAS
                 oReceptor.Nombre = "temporal";
                 oReceptor.Rfc = "TEST010203001";
-                */
+                /*
                 //REAL
                 oEmisor.Rfc = "CRE840310TC6";
                 oEmisor.Nombre = "Comercial Del Retiro SA de CV";
 
+                //REAL
+                oReceptor.Nombre = "PUBLICO EN GENERAL";
+                oReceptor.Rfc = RFCAnterior;
+
+                /*
                 if (RFCAnterior == "XAXX010101000")
                 {
                     //REAL
@@ -1741,7 +1877,7 @@ namespace WindowsFormsApp2
                     oReceptor.Nombre = nombre;
                     oReceptor.Rfc = RFCAnterior;
                 }
-                
+                */
                 
 
                 //Asignar emisor y receptor
@@ -1961,6 +2097,12 @@ namespace WindowsFormsApp2
                     case (28):
                         oComprobante.FormaPago = c_FormaPago.Item28;
                         break;
+                    case (02):
+                        oComprobante.FormaPago = c_FormaPago.Item02;
+                        break;
+                    case (03):
+                        oComprobante.FormaPago = c_FormaPago.Item03;
+                        break;
                 }
 
                 oComprobante.NoCertificado = ObtenerCertificado();
@@ -1993,26 +2135,25 @@ namespace WindowsFormsApp2
                 oEmisor.RegimenFiscal = c_RegimenFiscal.Item601; //Siempre el mismo
                 ComprobanteReceptor oReceptor = new ComprobanteReceptor();
                 
+                /*
                 //REALES
-                
                 oEmisor.Rfc = "CRE840310TC6";
                 oEmisor.Nombre = "COMERCIAL DEL RETIRO SA DE CV";
+
                 //REALES
                 oReceptor.Nombre = nombre;
                 oReceptor.Rfc = RFC;
-
-                /*
+                */
+                
                 
                 //PRUEBA
-
                 oEmisor.Rfc = "TES030201001";
                 oEmisor.Nombre = "temporal";
 
                 //PRUEBA
                 oReceptor.Nombre = "temporal";
                 oReceptor.Rfc = "TEST010203001";
-                */         
-
+                     
 
                 oComprobante.Emisor = oEmisor;
                 oComprobante.Receptor = oReceptor;
@@ -2128,8 +2269,10 @@ namespace WindowsFormsApp2
                                 }
                                 else
                                 {
-                                    MessageBox.Show("Este articulo no tiene clave de productos y servicios", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    MessageBox.Show("ESTE ARTÍCULO NO TIENE CLAVE DE PRODUCTOS Y SERVICIOS, CONTACTE A SISTEMAS", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    MessageBox.Show("EL PROGRAMA SE CERRARÁ, PROPORCIONE ESTÁ CLAVE DE PRODUCTOS Y SERVICIOS A SISTEMAS: "+ claveProdServ, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     claveProdServ = null;
+                                    facturaOK = 1;
                                 }
 
                             }
@@ -2203,7 +2346,9 @@ namespace WindowsFormsApp2
                 oComprobante.Impuestos = oImpuestosG;
 
                 oComprobante.SubTotal = Math.Round(totaltotal, 2);
+                //MessageBox.Show("Subtotal: " + Math.Round(totaltotal, 2));
                 oComprobante.Total = Math.Round(totaltotal + ivaTotal, 2);
+                //MessageBox.Show("Subtotal: " + Math.Round(totaltotal + ivaTotal, 2));
 
                 //Crear el XML 
                 XML(oComprobante);
@@ -2240,6 +2385,10 @@ namespace WindowsFormsApp2
                 string stringXML = null;
                 stringXML = DocumentoXML.OuterXml;
                 //Timbrar
+
+                // ############## VALIDAR RFC --------------------------------------------------------------
+                //ServicioTimbrado_FEL.ValidarRFC("", "", "");
+
                 RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContraseñaFEll, stringXML, numOp);
 
                 //"DEMO010233001", "Pruebas1a$", "C62D76BA-7E57-7E57-7E57-23288A910663", ""
