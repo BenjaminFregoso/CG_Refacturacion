@@ -1745,23 +1745,211 @@ namespace WindowsFormsApp2
 
                 }
                 //1.300.1
-                if (tieneAbono == true)
+                if (tieneAbono == true && facturaOK == 0)
                 {
-                    //TIMBRAR ABONOS
+                    TimbrarPagos();
                 }
                 labelInfo.Text = "RE FACTURACIÓN COMPLETA";
             }
             Cursor.Current = Cursors.Default;
         }
 
-        //TIMBRAR ABONOS Y ENGANCHE 1.300.1
+        //TIMBRAR ABONOS Y ENGANCHE 1.300.1 ------------------------------------------------------######################################### PAGOS ###############################
         private void TimbrarPagos()
         {
+            MessageBox.Show("Timbrando pagos");
+            Comprobante oComprobante = new Comprobante();
+
+            oComprobante.Version = "3.3";
+            oComprobante.Serie = "H";
+            //oComprobante.Folio = numOp; //Numero de operacion
+            oComprobante.Folio = "1"; //Numero de operacion
+            dateTimePicker1.Format = DateTimePickerFormat.Custom;
+            dateTimePicker1.CustomFormat = "yyyy-MM-ddTHH:mm:ss";
+            oComprobante.Fecha = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Formato que debe llevar 
+            oComprobante.NoCertificado = ObtenerCertificado();
+            oComprobante.SubTotal = 0;
+            oComprobante.Total = 0;
+            oComprobante.Moneda = c_Moneda.XXX;
+            oComprobante.TipoDeComprobante = c_TipoDeComprobante.P; //Siempre P en factura pagos
+            oComprobante.LugarExpedicion = lugarExpedicion;
+
+
+
+            ComprobanteEmisor oEmisor = new ComprobanteEmisor();
+            oEmisor.RegimenFiscal = c_RegimenFiscal.Item601; //Siempre el mismo
+            ComprobanteReceptor oReceptor = new ComprobanteReceptor();
+
+            /*
+            //REALES
+            oEmisor.Rfc = "CRE840310TC6";
+            oEmisor.Nombre = "COMERCIAL DEL RETIRO SA DE CV";
+
+            //REALES
+            oReceptor.Nombre = nombre;
+            oReceptor.Rfc = RFC;
+            */
+
+
+            //PRUEBA
+            oEmisor.Rfc = "TES030201001";
+            oEmisor.Nombre = "temporal";
+
+            //PRUEBA
+            oReceptor.Nombre = "temporal";
+            oReceptor.Rfc = "TEST010203001";
+            oReceptor.UsoCFDI = c_UsoCFDI.P01;
+
+            oComprobante.Emisor = oEmisor;
+            oComprobante.Receptor = oReceptor;
+
+            List<ComprobanteConcepto> lstConceptos = new List<ComprobanteConcepto>();
+            ComprobanteConcepto oConcepto = new ComprobanteConcepto();
+            oConcepto.Importe = 0;
+            oConcepto.ClaveProdServ = "84111506"; //Siempre para Pagos
+            oConcepto.Cantidad = 1;
+            oConcepto.ClaveUnidad = "ACT"; //siempre
+            oConcepto.Descripcion = "Pago";
+            oConcepto.ValorUnitario = 0;
+            // oConcepto.Descuento = 1;
+
+            lstConceptos.Add(oConcepto);
+
+            oComprobante.Conceptos = lstConceptos.ToArray();
+
+            Pagos oPagos = new Pagos();
+            List<PagosPago> lstPagos = new List<PagosPago>();
+            PagosPago oPago = new PagosPago();
+
+            
+            oPago.MonedaP = c_Moneda.MXN;
+            oPago.FormaDePagoP = c_FormaPago.Item01;
+            oPago.Monto = 123;
+            oPago.FechaPago = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Formato que debe llevar 
+
+            //Doctos relacionados
+            List<PagosPagoDoctoRelacionado> lstDoctos = new List<PagosPagoDoctoRelacionado>();
+            PagosPagoDoctoRelacionado oDoctoRelacionado = new PagosPagoDoctoRelacionado();
+            oDoctoRelacionado.IdDocumento = "BEDC8964-7E57-4604-9968-7E01378E8706";
+            oDoctoRelacionado.MonedaDR = c_Moneda.MXN;
+            oDoctoRelacionado.ImpPagado = 123;
+            oDoctoRelacionado.MetodoDePagoDR = c_MetodoPago.PPD;
+            oDoctoRelacionado.NumParcialidad = "1";
+            oDoctoRelacionado.ImpSaldoInsoluto = 0;
+            oDoctoRelacionado.ImpPagado = 123;
+            oDoctoRelacionado.ImpSaldoAnt = 123;
+            oDoctoRelacionado.Folio = "numop";
+
+            lstDoctos.Add(oDoctoRelacionado);
+
+            oPago.DoctoRelacionado = lstDoctos.ToArray();
+             
+            lstPagos.Add(oPago);
+            oPagos.Pago = lstPagos.ToArray();
+
+            oComprobante.Complemento = new ComprobanteComplemento[1];
+            oComprobante.Complemento[0] = new ComprobanteComplemento();
+
+
+            XmlDocument docPago = new XmlDocument();
+            XmlSerializerNamespaces xmlNameSpacePago = new XmlSerializerNamespaces();
+            xmlNameSpacePago.Add("pago10", "http://www.sat.gob.mx");
+            using (XmlWriter writer = docPago.CreateNavigator().AppendChild())
+            {
+                new XmlSerializer(oPagos.GetType()).Serialize(writer, oPagos, xmlNameSpacePago);
+            }
+            oComprobante.Complemento[0].Any = new XmlElement[1];
+            oComprobante.Complemento[0].Any[0] = docPago.DocumentElement;
+
+
+            //Crear el XML 
+            XML(oComprobante);
+            //xsl //Crear la cadena 
+            string cadenaOriginal = "";
+            string pathxsl = @"\\192.168.0.2\Sistemas\Sistemas\Refacturacion\Sellos\cadenaoriginal_3_3.xslt";
+            System.Xml.Xsl.XslCompiledTransform transformador = new System.Xml.Xsl.XslCompiledTransform(true);
+            transformador.Load(pathxsl);
+            using (StringWriter sw = new StringWriter())
+            using (XmlWriter xwo = XmlWriter.Create(sw, transformador.OutputSettings))
+            {
+                transformador.Transform(pathXML, xwo);
+                cadenaOriginal = sw.ToString();
+            }
+            //Sellar el documento
+            SelloDigital oselloDigital = new SelloDigital();
+            oComprobante.Certificado = oselloDigital.Certificado(pathCer);
+            oComprobante.Sello = Test_Mex_Sign_Data(cadenaOriginal);
+            //Sobre escribir el xml ya sellado
+            XML(oComprobante);
+
+            //Se instancia el WS de Timbrado.
+            ServiceReferenceFac.WSCFDI33Client ServicioTimbrado_FEL = new ServiceReferenceFac.WSCFDI33Client();
+
+            //Se instancia la Respuesta del WS de Timbrado.
+            ServiceReferenceFac.RespuestaTFD33 RespuestaTimbrado_FEL = new ServiceReferenceFac.RespuestaTFD33();
+            ServiceReferenceFac.RespuestaTFD33 RespuestaServicio_FEL = new ServiceReferenceFac.RespuestaTFD33();
+            //Se carga el XML desde archivo.
+            XmlDocument DocumentoXML = new XmlDocument();
+            //La direccion se sustituira dependiendo de donde se leera el XML.
+            DocumentoXML.Load(pathxDinamico + diaCarpeta + numOpPathXMLFac + ".xml");
+
+            //Variable string que contiene el contenido del XML.
+            string stringXML = null;
+            stringXML = DocumentoXML.OuterXml;
+            //Timbrar
+
+            // ############## VALIDAR RFC --------------------------------------------------------------
+            //ServicioTimbrado_FEL.ValidarRFC("", "", "");
+
+            RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContraseñaFEll, stringXML, numOp);
+
+            //"DEMO010233001", "Pruebas1a$", "C62D76BA-7E57-7E57-7E57-23288A910663", ""
+            //Obteniendo la respuesta se valida que haya sido exitosa.
+            if (RespuestaTimbrado_FEL.OperacionExitosa == true)
+            {
+                MessageBox.Show("ESTADO DEL PAGO: " + RespuestaTimbrado_FEL.Timbre.Estado + System.Environment.NewLine, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                observaciones = RespuestaTimbrado_FEL.Timbre.Estado.ToString();
+                UUIDNUEVO = RespuestaTimbrado_FEL.Timbre.UUID.ToString();
+
+                DocumentoXML.LoadXml(RespuestaTimbrado_FEL.XMLResultado);
+                DocumentoXML.Save(pathxDinamico + diaCarpeta + numOp + ".xml");
+
+                //Generar PDF
+                RespuestaServicio_FEL = ServicioTimbrado_FEL.ObtenerPDF(UsuarioFell, ContraseñaFEll, UUIDNUEVO, "");
+                //Guardo el PDF del CFDi.
+                facturaOK = 0;
+                try
+                {
+                    File.WriteAllBytes(pathxDinamico + diaCarpeta + numOp + ".pdf", Convert.FromBase64String(RespuestaServicio_FEL.PDFResultado));
+                    try
+                    {
+                        EnviarCorreo(pathxDinamico + diaCarpeta + numOp + ".pdf", pathxDinamico + diaCarpeta + numOp + ".xml", to);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("NO SE ENVIÓ EL CORREO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                catch (Exception errorPdf)
+                {
+                    MessageBox.Show("ERROR PDF:" + errorPdf, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    MessageBox.Show("" + RespuestaServicio_FEL.CodigoRespuesta + System.Environment.NewLine +
+                    RespuestaServicio_FEL.MensajeError + System.Environment.NewLine +
+                     RespuestaServicio_FEL.MensajeErrorDetallado + System.Environment.NewLine);
+                }
+
+            }
+            else
+            {
+                MessageBox.Show("ERROR: " + RespuestaTimbrado_FEL.CodigoRespuesta + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeError + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeErrorDetallado + System.Environment.NewLine, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                observaciones = RespuestaTimbrado_FEL.CodigoRespuesta.ToString() + "  " + RespuestaTimbrado_FEL.MensajeErrorDetallado.ToString();
+                facturaOK = 1;
+            }
 
         }
 
-        //OBTENER CERTIFICADO
-        private string ObtenerCertificado()
+            //OBTENER CERTIFICADO
+            private string ObtenerCertificado()
         {
             //Obtener el numero
             string numeroCertificado="", aa, b, c;

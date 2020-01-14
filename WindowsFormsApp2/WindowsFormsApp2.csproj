@@ -75,6 +75,7 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="catCFDI_tdCFDI_catPagos_Pagos10.cs" />
     <Compile Include="cfdv33_tdCFDI_catCFDI.cs" />
     <Compile Include="Connected Services\ServiceReferenceFac\Reference.cs">
       <AutoGen>True</AutoGen>
