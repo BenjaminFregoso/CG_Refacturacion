@@ -705,6 +705,12 @@ namespace WindowsFormsApp2 {
             
             private global::System.Data.DataColumn columnCantidad;
             
+            private global::System.Data.DataColumn columnrecibo;
+            
+            private global::System.Data.DataColumn columnConcepto;
+            
+            private global::System.Data.DataColumn columnParcialidad;
+            
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public movtosDataTable() {
@@ -764,6 +770,30 @@ namespace WindowsFormsApp2 {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public global::System.Data.DataColumn reciboColumn {
+                get {
+                    return this.columnrecibo;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public global::System.Data.DataColumn ConceptoColumn {
+                get {
+                    return this.columnConcepto;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public global::System.Data.DataColumn ParcialidadColumn {
+                get {
+                    return this.columnParcialidad;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             [global::System.ComponentModel.Browsable(false)]
             public int Count {
                 get {
@@ -799,12 +829,15 @@ namespace WindowsFormsApp2 {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
-            public movtosRow AddmovtosRow(string Operacion, System.DateTime Feabono, decimal Cantidad) {
+            public movtosRow AddmovtosRow(string Operacion, System.DateTime Feabono, decimal Cantidad, string recibo, string Concepto, int Parcialidad) {
                 movtosRow rowmovtosRow = ((movtosRow)(this.NewRow()));
                 object[] columnValuesArray = new object[] {
                         Operacion,
                         Feabono,
-                        Cantidad};
+                        Cantidad,
+                        recibo,
+                        Concepto,
+                        Parcialidad};
                 rowmovtosRow.ItemArray = columnValuesArray;
                 this.Rows.Add(rowmovtosRow);
                 return rowmovtosRow;
@@ -830,6 +863,9 @@ namespace WindowsFormsApp2 {
                 this.columnOperacion = base.Columns["Operacion"];
                 this.columnFeabono = base.Columns["Feabono"];
                 this.columnCantidad = base.Columns["Cantidad"];
+                this.columnrecibo = base.Columns["recibo"];
+                this.columnConcepto = base.Columns["Concepto"];
+                this.columnParcialidad = base.Columns["Parcialidad"];
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -841,7 +877,15 @@ namespace WindowsFormsApp2 {
                 base.Columns.Add(this.columnFeabono);
                 this.columnCantidad = new global::System.Data.DataColumn("Cantidad", typeof(decimal), null, global::System.Data.MappingType.Element);
                 base.Columns.Add(this.columnCantidad);
+                this.columnrecibo = new global::System.Data.DataColumn("recibo", typeof(string), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnrecibo);
+                this.columnConcepto = new global::System.Data.DataColumn("Concepto", typeof(string), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnConcepto);
+                this.columnParcialidad = new global::System.Data.DataColumn("Parcialidad", typeof(int), null, global::System.Data.MappingType.Element);
+                base.Columns.Add(this.columnParcialidad);
                 this.columnOperacion.MaxLength = 12;
+                this.columnrecibo.MaxLength = 9;
+                this.columnConcepto.MaxLength = 12;
             }
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -1259,6 +1303,54 @@ namespace WindowsFormsApp2 {
             
             [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public string recibo {
+                get {
+                    try {
+                        return ((string)(this[this.tablemovtos.reciboColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("El valor de la columna \'recibo\' de la tabla \'movtos\' es DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tablemovtos.reciboColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public string Concepto {
+                get {
+                    try {
+                        return ((string)(this[this.tablemovtos.ConceptoColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("El valor de la columna \'Concepto\' de la tabla \'movtos\' es DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tablemovtos.ConceptoColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public int Parcialidad {
+                get {
+                    try {
+                        return ((int)(this[this.tablemovtos.ParcialidadColumn]));
+                    }
+                    catch (global::System.InvalidCastException e) {
+                        throw new global::System.Data.StrongTypingException("El valor de la columna \'Parcialidad\' de la tabla \'movtos\' es DBNull.", e);
+                    }
+                }
+                set {
+                    this[this.tablemovtos.ParcialidadColumn] = value;
+                }
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public bool IsOperacionNull() {
                 return this.IsNull(this.tablemovtos.OperacionColumn);
             }
@@ -1291,6 +1383,42 @@ namespace WindowsFormsApp2 {
             [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
             public void SetCantidadNull() {
                 this[this.tablemovtos.CantidadColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public bool IsreciboNull() {
+                return this.IsNull(this.tablemovtos.reciboColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public void SetreciboNull() {
+                this[this.tablemovtos.reciboColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public bool IsConceptoNull() {
+                return this.IsNull(this.tablemovtos.ConceptoColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public void SetConceptoNull() {
+                this[this.tablemovtos.ConceptoColumn] = global::System.Convert.DBNull;
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public bool IsParcialidadNull() {
+                return this.IsNull(this.tablemovtos.ParcialidadColumn);
+            }
+            
+            [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+            [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
+            public void SetParcialidadNull() {
+                this[this.tablemovtos.ParcialidadColumn] = global::System.Convert.DBNull;
             }
         }
         
@@ -1538,7 +1666,7 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
                 ", UUIDRelacionado, UUIDCancelado\r\nFROM            ATQ.dbCredito.dbo.TimbreCredit" +
                 "o AS TimbreCredito_1\r\nWHERE        (Operacion = @numOperacion)";
             this._commandCollection[1].CommandType = global::System.Data.CommandType.Text;
-            this._commandCollection[1].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@numOperacion", global::System.Data.SqlDbType.VarChar, 12, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
+            this._commandCollection[1].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@numOperacion", global::System.Data.SqlDbType.Variant, 1024, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._commandCollection[2] = new global::System.Data.SqlClient.SqlCommand();
             this._commandCollection[2].Connection = this.Connection;
             this._commandCollection[2].CommandText = "SELECT        Recibo, Operacion, Total, Fecha, UUID, Observaciones, Tipo, Estatus" +
@@ -1595,13 +1723,13 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, false)]
-        public virtual int FillByATQ(dbCreditoDataCredito.TimbreCreditoDataTable dataTable, string numOperacion) {
+        public virtual int FillByATQ(dbCreditoDataCredito.TimbreCreditoDataTable dataTable, object numOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[1];
             if ((numOperacion == null)) {
                 throw new global::System.ArgumentNullException("numOperacion");
             }
             else {
-                this.Adapter.SelectCommand.Parameters[0].Value = ((string)(numOperacion));
+                this.Adapter.SelectCommand.Parameters[0].Value = ((object)(numOperacion));
             }
             if ((this.ClearBeforeFill == true)) {
                 dataTable.Clear();
@@ -1614,13 +1742,13 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Select, false)]
-        public virtual dbCreditoDataCredito.TimbreCreditoDataTable GetDataByATQ(string numOperacion) {
+        public virtual dbCreditoDataCredito.TimbreCreditoDataTable GetDataByATQ(object numOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[1];
             if ((numOperacion == null)) {
                 throw new global::System.ArgumentNullException("numOperacion");
             }
             else {
-                this.Adapter.SelectCommand.Parameters[0].Value = ((string)(numOperacion));
+                this.Adapter.SelectCommand.Parameters[0].Value = ((object)(numOperacion));
             }
             dbCreditoDataCredito.TimbreCreditoDataTable dataTable = new dbCreditoDataCredito.TimbreCreditoDataTable();
             this.Adapter.Fill(dataTable);
@@ -1924,15 +2052,22 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
             tableMapping.ColumnMappings.Add("Operacion", "Operacion");
             tableMapping.ColumnMappings.Add("Feabono", "Feabono");
             tableMapping.ColumnMappings.Add("Cantidad", "Cantidad");
+            tableMapping.ColumnMappings.Add("recibo", "recibo");
+            tableMapping.ColumnMappings.Add("Concepto", "Concepto");
+            tableMapping.ColumnMappings.Add("Parcialidad", "Parcialidad");
             this._adapter.TableMappings.Add(tableMapping);
             this._adapter.InsertCommand = new global::System.Data.SqlClient.SqlCommand();
             this._adapter.InsertCommand.Connection = this.Connection;
-            this._adapter.InsertCommand.CommandText = "INSERT INTO [movtos] ([Operacion], [Feabono], [Cantidad]) VALUES (@Operacion, @Fe" +
-                "abono, @Cantidad)";
+            this._adapter.InsertCommand.CommandText = "INSERT INTO [movtos] ([Operacion], [Feabono], [Cantidad], [recibo], [Concepto], [" +
+                "Parcialidad]) VALUES (@Operacion, @Feabono, @Cantidad, @recibo, @Concepto, @Parc" +
+                "ialidad)";
             this._adapter.InsertCommand.CommandType = global::System.Data.CommandType.Text;
             this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Operacion", global::System.Data.SqlDbType.VarChar, 0, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Feabono", global::System.Data.SqlDbType.DateTime, 0, global::System.Data.ParameterDirection.Input, 0, 0, "Feabono", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Cantidad", global::System.Data.SqlDbType.Money, 0, global::System.Data.ParameterDirection.Input, 0, 0, "Cantidad", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
+            this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@recibo", global::System.Data.SqlDbType.VarChar, 0, global::System.Data.ParameterDirection.Input, 0, 0, "recibo", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
+            this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Concepto", global::System.Data.SqlDbType.VarChar, 0, global::System.Data.ParameterDirection.Input, 0, 0, "Concepto", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
+            this._adapter.InsertCommand.Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@Parcialidad", global::System.Data.SqlDbType.Int, 0, global::System.Data.ParameterDirection.Input, 0, 0, "Parcialidad", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -1948,28 +2083,32 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
             this._commandCollection = new global::System.Data.SqlClient.SqlCommand[4];
             this._commandCollection[0] = new global::System.Data.SqlClient.SqlCommand();
             this._commandCollection[0].Connection = this.Connection;
-            this._commandCollection[0].CommandText = "SELECT        Operacion, Feabono, Cantidad\r\nFROM            movtos\r\nWHERE        " +
-                "(Operacion = @numOperacion)";
+            this._commandCollection[0].CommandText = "SELECT        Operacion, Feabono, Cantidad, recibo, Concepto, Parcialidad\r\nFROM  " +
+                "          movtos\r\nWHERE        (Operacion = @numOperacion)\r\norder by Parcialidad" +
+                " desc";
             this._commandCollection[0].CommandType = global::System.Data.CommandType.Text;
             this._commandCollection[0].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@numOperacion", global::System.Data.SqlDbType.VarChar, 12, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._commandCollection[1] = new global::System.Data.SqlClient.SqlCommand();
             this._commandCollection[1].Connection = this.Connection;
-            this._commandCollection[1].CommandText = "SELECT        Operacion, Feabono, Cantidad\r\nFROM            ATQ.dbCredito.dbo.mov" +
-                "tos AS TimbreCredito_1\r\nWHERE        (Operacion = @numOperacion)";
+            this._commandCollection[1].CommandText = "SELECT         Operacion, Feabono, Cantidad, recibo, Concepto, Parcialidad\r\nFROM " +
+                "           ATQ.dbCredito.dbo.movtos AS TimbreCredito_1\r\nWHERE        (Operacion " +
+                "= @numOperacion)\r\norder by Parcialidad desc";
             this._commandCollection[1].CommandType = global::System.Data.CommandType.Text;
-            this._commandCollection[1].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@numOperacion", global::System.Data.SqlDbType.VarChar, 12, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
+            this._commandCollection[1].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@numOperacion", global::System.Data.SqlDbType.Variant, 1024, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._commandCollection[2] = new global::System.Data.SqlClient.SqlCommand();
             this._commandCollection[2].Connection = this.Connection;
-            this._commandCollection[2].CommandText = "SELECT        Operacion, Feabono, Cantidad\r\nFROM          IXTLA.dbCredito.dbo.mov" +
-                "tos AS TimbreCredito_1\r\nWHERE        (Operacion = @numOperacion)";
+            this._commandCollection[2].CommandText = "SELECT       Operacion, Feabono, Cantidad, recibo, Concepto, Parcialidad\r\nFROM   " +
+                "       IXTLA.dbCredito.dbo.movtos AS TimbreCredito_1\r\nWHERE        (Operacion = " +
+                "@numOperacion)\r\norder by Parcialidad desc";
             this._commandCollection[2].CommandType = global::System.Data.CommandType.Text;
-            this._commandCollection[2].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@numOperacion", global::System.Data.SqlDbType.VarChar, 12, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
+            this._commandCollection[2].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@numOperacion", global::System.Data.SqlDbType.Variant, 1024, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
             this._commandCollection[3] = new global::System.Data.SqlClient.SqlCommand();
             this._commandCollection[3].Connection = this.Connection;
-            this._commandCollection[3].CommandText = "SELECT        Operacion, Feabono, Cantidad\r\nFROM          TLAJO.dbCredito.dbo.mov" +
-                "tos AS TimbreCredito_1\r\nWHERE        (Operacion = @numOperacion)";
+            this._commandCollection[3].CommandText = "SELECT        Operacion, Feabono, Cantidad, recibo, Concepto, Parcialidad\r\nFROM  " +
+                "        TLAJO.dbCredito.dbo.movtos AS TimbreCredito_1\r\nWHERE        (Operacion =" +
+                " @numOperacion)\r\norder by Parcialidad desc";
             this._commandCollection[3].CommandType = global::System.Data.CommandType.Text;
-            this._commandCollection[3].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@numOperacion", global::System.Data.SqlDbType.VarChar, 12, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
+            this._commandCollection[3].Parameters.Add(new global::System.Data.SqlClient.SqlParameter("@numOperacion", global::System.Data.SqlDbType.Variant, 1024, global::System.Data.ParameterDirection.Input, 0, 0, "Operacion", global::System.Data.DataRowVersion.Current, false, null, "", "", ""));
         }
         
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
@@ -2012,13 +2151,13 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, false)]
-        public virtual int FillByATQ(dbCreditoDataCredito.movtosDataTable dataTable, string numOperacion) {
+        public virtual int FillByATQ(dbCreditoDataCredito.movtosDataTable dataTable, object numOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[1];
             if ((numOperacion == null)) {
                 throw new global::System.ArgumentNullException("numOperacion");
             }
             else {
-                this.Adapter.SelectCommand.Parameters[0].Value = ((string)(numOperacion));
+                this.Adapter.SelectCommand.Parameters[0].Value = ((object)(numOperacion));
             }
             if ((this.ClearBeforeFill == true)) {
                 dataTable.Clear();
@@ -2031,13 +2170,13 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Select, false)]
-        public virtual dbCreditoDataCredito.movtosDataTable GetDataByATQ(string numOperacion) {
+        public virtual dbCreditoDataCredito.movtosDataTable GetDataByATQ(object numOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[1];
             if ((numOperacion == null)) {
                 throw new global::System.ArgumentNullException("numOperacion");
             }
             else {
-                this.Adapter.SelectCommand.Parameters[0].Value = ((string)(numOperacion));
+                this.Adapter.SelectCommand.Parameters[0].Value = ((object)(numOperacion));
             }
             dbCreditoDataCredito.movtosDataTable dataTable = new dbCreditoDataCredito.movtosDataTable();
             this.Adapter.Fill(dataTable);
@@ -2048,13 +2187,13 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, false)]
-        public virtual int FillByIXTLA(dbCreditoDataCredito.movtosDataTable dataTable, string numOperacion) {
+        public virtual int FillByIXTLA(dbCreditoDataCredito.movtosDataTable dataTable, object numOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[2];
             if ((numOperacion == null)) {
                 throw new global::System.ArgumentNullException("numOperacion");
             }
             else {
-                this.Adapter.SelectCommand.Parameters[0].Value = ((string)(numOperacion));
+                this.Adapter.SelectCommand.Parameters[0].Value = ((object)(numOperacion));
             }
             if ((this.ClearBeforeFill == true)) {
                 dataTable.Clear();
@@ -2067,13 +2206,13 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Select, false)]
-        public virtual dbCreditoDataCredito.movtosDataTable GetDataByIXTLA(string numOperacion) {
+        public virtual dbCreditoDataCredito.movtosDataTable GetDataByIXTLA(object numOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[2];
             if ((numOperacion == null)) {
                 throw new global::System.ArgumentNullException("numOperacion");
             }
             else {
-                this.Adapter.SelectCommand.Parameters[0].Value = ((string)(numOperacion));
+                this.Adapter.SelectCommand.Parameters[0].Value = ((object)(numOperacion));
             }
             dbCreditoDataCredito.movtosDataTable dataTable = new dbCreditoDataCredito.movtosDataTable();
             this.Adapter.Fill(dataTable);
@@ -2084,13 +2223,13 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Fill, false)]
-        public virtual int FillByTLAJO(dbCreditoDataCredito.movtosDataTable dataTable, string numOperacion) {
+        public virtual int FillByTLAJO(dbCreditoDataCredito.movtosDataTable dataTable, object numOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[3];
             if ((numOperacion == null)) {
                 throw new global::System.ArgumentNullException("numOperacion");
             }
             else {
-                this.Adapter.SelectCommand.Parameters[0].Value = ((string)(numOperacion));
+                this.Adapter.SelectCommand.Parameters[0].Value = ((object)(numOperacion));
             }
             if ((this.ClearBeforeFill == true)) {
                 dataTable.Clear();
@@ -2103,13 +2242,13 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Select, false)]
-        public virtual dbCreditoDataCredito.movtosDataTable GetDataByTLAJO(string numOperacion) {
+        public virtual dbCreditoDataCredito.movtosDataTable GetDataByTLAJO(object numOperacion) {
             this.Adapter.SelectCommand = this.CommandCollection[3];
             if ((numOperacion == null)) {
                 throw new global::System.ArgumentNullException("numOperacion");
             }
             else {
-                this.Adapter.SelectCommand.Parameters[0].Value = ((string)(numOperacion));
+                this.Adapter.SelectCommand.Parameters[0].Value = ((object)(numOperacion));
             }
             dbCreditoDataCredito.movtosDataTable dataTable = new dbCreditoDataCredito.movtosDataTable();
             this.Adapter.Fill(dataTable);
@@ -2149,7 +2288,7 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
         [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Data.Design.TypedDataSetGenerator", "16.0.0.0")]
         [global::System.ComponentModel.Design.HelpKeywordAttribute("vs.data.TableAdapter")]
         [global::System.ComponentModel.DataObjectMethodAttribute(global::System.ComponentModel.DataObjectMethodType.Insert, true)]
-        public virtual int Insert(string Operacion, global::System.Nullable<global::System.DateTime> Feabono, global::System.Nullable<decimal> Cantidad) {
+        public virtual int Insert(string Operacion, global::System.Nullable<global::System.DateTime> Feabono, global::System.Nullable<decimal> Cantidad, string recibo, string Concepto, global::System.Nullable<int> Parcialidad) {
             if ((Operacion == null)) {
                 this.Adapter.InsertCommand.Parameters[0].Value = global::System.DBNull.Value;
             }
@@ -2167,6 +2306,24 @@ namespace WindowsFormsApp2.dbCreditoDataCreditoTableAdapters {
             }
             else {
                 this.Adapter.InsertCommand.Parameters[2].Value = global::System.DBNull.Value;
+            }
+            if ((recibo == null)) {
+                this.Adapter.InsertCommand.Parameters[3].Value = global::System.DBNull.Value;
+            }
+            else {
+                this.Adapter.InsertCommand.Parameters[3].Value = ((string)(recibo));
+            }
+            if ((Concepto == null)) {
+                this.Adapter.InsertCommand.Parameters[4].Value = global::System.DBNull.Value;
+            }
+            else {
+                this.Adapter.InsertCommand.Parameters[4].Value = ((string)(Concepto));
+            }
+            if ((Parcialidad.HasValue == true)) {
+                this.Adapter.InsertCommand.Parameters[5].Value = ((int)(Parcialidad.Value));
+            }
+            else {
+                this.Adapter.InsertCommand.Parameters[5].Value = global::System.DBNull.Value;
             }
             global::System.Data.ConnectionState previousConnectionState = this.Adapter.InsertCommand.Connection.State;
             if (((this.Adapter.InsertCommand.Connection.State & global::System.Data.ConnectionState.Open) 
