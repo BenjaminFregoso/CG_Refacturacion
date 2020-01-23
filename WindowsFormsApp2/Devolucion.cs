@@ -52,6 +52,7 @@ namespace WindowsFormsApp2
         String UsuarioFell = "CRE840310D33";
         String ContraseñaFEll = "contRa$3na";
 
+
         string pFormaDePago = "", pConcepto, pParcialidad = "", oUUID;
         decimal pCantidad = 0, pDescuento = 0, pSaldoAct = 0, pSaldoAnt = 0;
         string servidor, RFCAnterior, formaPagoStr, oPagosOperacion;
@@ -68,7 +69,15 @@ namespace WindowsFormsApp2
 
         private void ButtonPagos_Click(object sender, EventArgs e)
         {
-            TimbrarPagos();
+            if(RFCAnterior == "XAXX010101000")
+            {
+                MessageBox.Show("ES NECESARIO TENER UNA FACTURA NOMINATIVA PARA TIMBRAR UN ABONO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+                TimbrarPagos();
+            }
+            
         }
 
         private void pictureBox5_Click(object sender, EventArgs e)
@@ -1344,6 +1353,11 @@ namespace WindowsFormsApp2
                 this.det_VentDataGridView.DataBindings.Clear();
                 det_VentDataGridView.Refresh();
             }
+            if (timbreCreditoDataGridView.Rows.Count != 0)
+            {
+                this.timbreCreditoDataGridView.DataBindings.Clear();
+                timbreCreditoDataGridView.Refresh();
+            }
 
             texttotal.Text = "TOTAL DE LA VENTA: ";
             labelInfo.Text = "";
@@ -1617,6 +1631,7 @@ namespace WindowsFormsApp2
                     
                     buttonReFac.Enabled = false;
                     ButtonPagos.Enabled = false;
+
                 }
                 else
                 {
@@ -1697,7 +1712,16 @@ namespace WindowsFormsApp2
                 ButtonFacturar.Enabled = false;
                 buttonReFac.Enabled = false;
                 ButtonPagos.Enabled = true;
-                labelInfo.Text = "ESTA OPERACIÓN TIENE RFC NOMINATIVO";
+                buttonCorreo.Enabled = false;
+                if(RFCAnterior is null)
+                {
+                    labelInfo.Text = "ESTA OPERACIÓN NO TIENE FACTURA";
+                }
+                else
+                {
+                    labelInfo.Text = "ESTA OPERACIÓN TIENE RFC NOMINATIVO";
+                }
+                
             }
             if (timbreCreditoDataGridView.CurrentRow == null) 
             {
@@ -1718,14 +1742,24 @@ namespace WindowsFormsApp2
             {
                 ButtonPagos.Enabled = false;
                 buttonReFac.Enabled = false;
-                timbreCreditoDataGridView.Rows[0].Selected = true;
-                DataGridViewSelectedRowCollection row = timbreCreditoDataGridView.SelectedRows;
+                //Revisar si tiene abonos
                 tieneAbono = false;
-                //1.300.1
-                if (timbreCreditoDataGridView.CurrentRow != null) //Revisar abonos para timbrar despues de facturar
+                try
                 {
-                    tieneAbono = true;
+                    timbreCreditoDataGridView.Rows[0].Selected = true;
+                    DataGridViewSelectedRowCollection row = timbreCreditoDataGridView.SelectedRows;
+
+                    //1.300.1
+                    if (timbreCreditoDataGridView.CurrentRow != null) //Revisar abonos para timbrar despues de facturar
+                    {
+                        tieneAbono = true;
+                    }
                 }
+                catch
+                {
+
+                }
+                
 
                 //Uso CFDI
                 if (checkOtro.Checked)
@@ -1845,6 +1879,7 @@ namespace WindowsFormsApp2
         //TIMBRAR ABONOS Y ENGANCHE 1.300.1 ------------------------------------------------------######################################### PAGOS ###############################
         private void TimbrarPagos()
         {
+            Cursor.Current = Cursors.WaitCursor;
             //Conexion sql
             String servidor = GetServidor(5);
             SqlConnection cn = new SqlConnection(servidor);
@@ -1863,7 +1898,7 @@ namespace WindowsFormsApp2
                 //MessageBox.Show("Recibo: " + recibo);
                 cmd.CommandText = "SELECT * FROM  TimbreCredito where Recibo = '" + recibo + "'";
                 lector = cmd.ExecuteReader();
-
+                error = 0;
                 if (lector.HasRows)
                 {
                     //Ya está timbrado
@@ -1872,7 +1907,7 @@ namespace WindowsFormsApp2
                 {
                     try
                     {
-                        error = 0;
+                        
                         //Preparar datos
                         
                         lector.Close();
@@ -2124,6 +2159,7 @@ namespace WindowsFormsApp2
                                 }
                                 catch(Exception err)
                                 {
+                                    Cursor.Current = Cursors.Default;
                                     MessageBox.Show("ERROR AL GUARDAR EN BASE DE DATOS: " + err, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                 }
 
@@ -2140,11 +2176,13 @@ namespace WindowsFormsApp2
                                     }
                                     catch
                                     {
+                                        Cursor.Current = Cursors.Default;
                                         MessageBox.Show("NO SE ENVIÓ EL CORREO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                     }
                                 }
                                 catch (Exception errorPdf)
                                 {
+                                    Cursor.Current = Cursors.Default;
                                     MessageBox.Show("ERROR PDF:" + errorPdf, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                     MessageBox.Show("" + RespuestaServicio_FEL.CodigoRespuesta + System.Environment.NewLine +
                                     RespuestaServicio_FEL.MensajeError + System.Environment.NewLine +
@@ -2154,6 +2192,7 @@ namespace WindowsFormsApp2
                             }
                             else
                             {
+                                Cursor.Current = Cursors.Default;
                                 MessageBox.Show("ERROR: " + RespuestaTimbrado_FEL.CodigoRespuesta + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeError + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeErrorDetallado + System.Environment.NewLine, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
                                 observaciones = RespuestaTimbrado_FEL.CodigoRespuesta.ToString() + "  " + RespuestaTimbrado_FEL.MensajeErrorDetallado.ToString();
                                 facturaOK = 1;
@@ -2162,6 +2201,7 @@ namespace WindowsFormsApp2
                     }
                     catch(Exception erro)
                     {
+                        Cursor.Current = Cursors.Default;
                         MessageBox.Show("ERROR DE SISTEMA, NO SE TIMBRO EL PAGO" + Environment.NewLine + erro, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                     
@@ -2170,7 +2210,7 @@ namespace WindowsFormsApp2
                 lector.Close();
             }
 
-            
+            Cursor.Current = Cursors.Default;
 
         }
 
