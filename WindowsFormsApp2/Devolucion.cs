@@ -17,6 +17,7 @@ using CryptoSysPKI;
 using System.Net;
 using System.Net.Mail;
 using System.Configuration;
+//Version 1.300.2
 
 namespace WindowsFormsApp2
 {
@@ -39,7 +40,7 @@ namespace WindowsFormsApp2
 
         //REALES
         String UsuarioFell = "CRE840310TC6";
-        String ContraseñaFEll = "GuRgWjw$";
+        String ContrasenaFEll = "GuRgWjw$";
         */
         
         //PRUEBA
@@ -50,11 +51,12 @@ namespace WindowsFormsApp2
       
         //PRUEBA
         String UsuarioFell = "CRE840310D33";
-        String ContraseñaFEll = "contRa$3na";
+        String ContrasenaFEll = "contRa$3na";
+        
 
-
+        string UUIDCANCELADO, UUID, numOp, numOpProd, totalaux, totalletras, observaciones, numOpNC, numOpFac, usoCFDII, usoCFDI, UUIDNUEVO;
         string pFormaDePago = "", pConcepto, pParcialidad = "", oUUID;
-        decimal pCantidad = 0, pDescuento = 0, pSaldoAct = 0, pSaldoAnt = 0;
+        decimal pCantidad = 0, pDescuento = 0, pSaldoAct = 0, pSaldoAnt = 0, pInteres=0;
         string servidor, RFCAnterior, formaPagoStr, oPagosOperacion;
         bool tieneAbono = false;
         decimal totald, descuentod, subtotald, ivaTotal, importeDevolucion;
@@ -65,7 +67,7 @@ namespace WindowsFormsApp2
         string claveProdServ, numOpPathXMLFac, numOpPathXMLNota, MetodoPago, numOpSinCambios, importeGlobal;
         string from = "credito@casaguerrero.com.mx", to, pass = "credguerrero", subject = "Comercial del Retiro SA de CV", body = "";
         string operacion, fecha, operaci, cuenta, RFC, nombre, email, telefono, UUIDRELACIONADO, lugarExpedicion, sucursal, numOpCorreo;
-        string UUIDCANCELADO, UUID, numOp, numOpProd, totalaux, totalletras, observaciones, numOpNC, numOpFac, usoCFDII, usoCFDI, UUIDNUEVO;
+
 
         private void ButtonPagos_Click(object sender, EventArgs e)
         {
@@ -121,6 +123,11 @@ namespace WindowsFormsApp2
             textEmail.MaxLength = 50;
             textTelefono.MaxLength = 15;
 
+            buttonReFac.Enabled = false;
+            ButtonFacturar.Enabled = false;
+            buttonCorreo.Enabled = false;
+            ButtonPagos.Enabled = false;
+
         }
 
         private void Facturar_Click(object sender, EventArgs e)
@@ -128,7 +135,7 @@ namespace WindowsFormsApp2
             //1.200.1
             //#################----------------------------------------------------- EN PROGRESO ---------------------------------------------
             Cursor.Current = Cursors.WaitCursor;
-
+            
             //Datos
             operaci = textOperacion.Text;
             cuenta = textCuenta.Text;
@@ -160,15 +167,35 @@ namespace WindowsFormsApp2
                 {
                     timbreCreditoDataGridView.Rows[0].Selected = true;
                     DataGridViewSelectedRowCollection row = timbreCreditoDataGridView.SelectedRows;
+                    //1.300.1
+                    if (timbreCreditoDataGridView.CurrentRow != null) //Revisar abonos para timbrar despues de facturar
+                    {
+                        tieneAbono = true;
+                    }
                 }
                 catch
                 {
-
                 }
-                
 
-                if (timbreCreditoDataGridView.CurrentRow == null)
+
+                //Conexion sql
+                String servidor = GetServidor(5);
+                SqlConnection cn = new SqlConnection(servidor);
+                cn.Open();
+                SqlCommand cmd = cn.CreateCommand();
+                SqlDataReader lector;
+                cmd.CommandText = "SELECT * FROM  TimbreCredito where Operacion = '" + numOp + "'";
+                lector = cmd.ExecuteReader();
+                    
+                if (lector.HasRows)
                 {
+                    Cursor.Current = Cursors.Default;
+                    MessageBox.Show("NO SE PUEDE REFACTURAR POR QUE \nTIENE ABONOS O ENGANCHE YA FATURADOS", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    lector.Close();
+                }
+                else
+                {
+                    lector.Close();
                     //Uso CFDI
                     if (checkOtro.Checked)
                     {
@@ -195,10 +222,10 @@ namespace WindowsFormsApp2
                     fecha = dateTimePicker1.Text;
 
                     //Conexion sql
-                    String servidor = GetServidor(opServer);
-                    SqlConnection cn = new SqlConnection(servidor);
+                    servidor = GetServidor(opServer);
+                    cn = new SqlConnection(servidor);
                     cn.Open();
-                    SqlCommand cmd = cn.CreateCommand();
+                    cmd = cn.CreateCommand();
 
                     numOp = encontrarConsecutivo(numOpFac, operaci, "F");
                     
@@ -241,16 +268,13 @@ namespace WindowsFormsApp2
                         cancelaNegativo();//Enviar correo al terminar cancelación por negativos
 
                     }
+                    cn.Close();
                     //1.300.1
                     if (tieneAbono == true && facturaOK == 0)
                     {
                         TimbrarPagos();
                     }
-                }
-                else
-                {
-                    Cursor.Current = Cursors.Default;
-                    MessageBox.Show("NO SE PUEDE REFACTURAR POR QUE \nTIENE ABONOS O ENGANCHE YA FATURADOS", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    
                 }
                 Cursor.Current = Cursors.Default;
             }
@@ -487,6 +511,16 @@ namespace WindowsFormsApp2
         //CAMBIA CORREO 
         private void buttonCorreo_Click(object sender, EventArgs e)
         {
+            Cursor.Current = Cursors.WaitCursor;
+            if (UUID == "" || UUID is null)
+            {
+                Cursor.Current = Cursors.Default;
+                MessageBox.Show("NO EXISTE FACTURA CON ESTE NÚMERO DE OPERACIÓN", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            else
+            {
+
+            
             //Cargar datos de seleccionados
             ButtonPagos.Enabled = false;
             buttonReFac.Enabled = false;
@@ -498,7 +532,7 @@ namespace WindowsFormsApp2
             string uuidNom = row[0].Cells[16].Value.ToString();
             string diaCarpe;
             diaCarpe = diaCarpeta.Substring(0, 2) + "-" + diaCarpeta.Substring(3, 2) + "-" + diaCarpeta.Substring(6, 4) + @"\";
-            
+
             string correoNuevo;
             correoNuevo = textEmail.Text;
             if (uuidNom != "XAXX010101000")
@@ -524,6 +558,7 @@ namespace WindowsFormsApp2
             {
                 MessageBox.Show("NO SE PUEDE ENVIAR UNA FACTURA CON RFC GENERICO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
             }
+        }
         }
 
         //SELECCIONA PARA LLENAR DATOS PARA CAMBIO DE CORREO
@@ -565,7 +600,7 @@ namespace WindowsFormsApp2
                 try
                 {
                     protocoll.Send(mensaje);
-                    MessageBox.Show("EL CORREO SE ENVIÓ CON ÉXITO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    //MessageBox.Show("EL CORREO SE ENVIÓ CON ÉXITO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     
                 }
                 catch (Exception errormsj)
@@ -827,7 +862,7 @@ namespace WindowsFormsApp2
             string stringXML = null;
             stringXML = DocumentoXML.OuterXml;
             //Timbrar
-            RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContraseñaFEll, stringXML, numOp);
+            RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContrasenaFEll, stringXML, numOp);
 
             //Obteniendo la respuesta se valida que haya sido exitosa.
             if (RespuestaTimbrado_FEL.OperacionExitosa == true)
@@ -838,7 +873,7 @@ namespace WindowsFormsApp2
                 DocumentoXML.LoadXml(RespuestaTimbrado_FEL.XMLResultado);
                 DocumentoXML.Save(pathxDinamico + diaCarpeta + numOp + ".xml");
                 //Generar PDF
-                RespuestaServicio_FEL = ServicioTimbrado_FEL.ObtenerPDF(UsuarioFell, ContraseñaFEll, UUIDNUEVO, "");
+                RespuestaServicio_FEL = ServicioTimbrado_FEL.ObtenerPDF(UsuarioFell, ContrasenaFEll, UUIDNUEVO, "");
                 //Guardo el PDF del CFDi.
                 try
                 {
@@ -1326,7 +1361,40 @@ namespace WindowsFormsApp2
         //BUSCAR FACTURA
         private void buttonBuscar_Click(object sender, EventArgs e)
         {
+            buscar();
+            //validarRFC();
+        }
+        private void validarRFC()
+        {
+            string RFCvalidado = textOperacion.Text;
 
+            //Se instancia el WS de Timbrado.
+            ServiceReferenceFac.WSCFDI33Client ServicioTimbrado_FEL = new ServiceReferenceFac.WSCFDI33Client();
+
+            //Se instancia la Respuesta del WS de Timbrado.
+            //ServiceReferenceFac.RespuestaTFD33 RespuestaTimbrado_FEL = new ServiceReferenceFac.RespuestaTFD33();
+            ServiceReferenceFac.RespuestaValidacionRFC RespuestaTimbrado_FEL = new ServiceReferenceFac.RespuestaValidacionRFC();
+
+            ServicioTimbrado_FEL.ValidarRFC(UsuarioFell,ContrasenaFEll,"AUGH770323NC0");
+            
+            //Obteniendo la respuesta se valida que haya sido exitosa.
+
+            MessageBox.Show("Cancelado: "+RespuestaTimbrado_FEL.Cancelado.ToString());
+            MessageBox.Show("Localizado: " + RespuestaTimbrado_FEL.RFCLocalizado.ToString());
+            //MessageBox.Show("RFC: " + RespuestaTimbrado_FEL.RFC.ToString());
+            
+            if (RespuestaTimbrado_FEL.RFCLocalizado == true)
+            {
+                MessageBox.Show("Si existe este RFC");
+            }
+            else
+            {
+                MessageBox.Show("No existe este RFC");
+            } 
+        }
+
+        private void buscar()
+        {
             //PROGRAMAR VALIDAR NUMERO DE OPERACION ----------------------------------------------------------- 1.200.1
             buttonReFac.Enabled = true;
             ButtonPagos.Enabled = true;
@@ -1374,14 +1442,13 @@ namespace WindowsFormsApp2
                 buttonCorreo.Enabled = false;
                 ButtonPagos.Enabled = false;
             }
-            
-            
-            
+
             if (sucursal == "01" || sucursal == "02" || sucursal == "03" || sucursal == "04" || sucursal == "05" || sucursal == "13" || sucursal == "14" || sucursal == "15" || sucursal == "19" || sucursal == "20")
             {
                 try
                 {
                     //GUADALAJARA
+
                     this.facturasTableAdapter.Fill(this.dbSIADataFact.Facturas, operacion);
                     this.det_VentTableAdapter.Fill(this.dbSIADataDetalles.Det_Vent, operacion);
                     this.movtosTableAdapter.Fill(this.dbCreditoDataCredito.movtos, operacion);
@@ -1395,51 +1462,52 @@ namespace WindowsFormsApp2
             }
             else if (sucursal == "06" || sucursal == "07" || sucursal == "08" || sucursal == "09")
             {
-                try { 
+                try
+                {
 
-                //almacen = "02";//ATEQUIZA
-                this.facturasTableAdapter.FillByATQ(this.dbSIADataFact.Facturas, operacion);
-                this.det_VentTableAdapter.FillByATQ(this.dbSIADataDetalles.Det_Vent, operacion);
-                this.movtosTableAdapter.FillByATQ(this.dbCreditoDataCredito.movtos, operacion);
+                    //almacen = "02";//ATEQUIZA
+                    this.facturasTableAdapter.FillByATQ(this.dbSIADataFact.Facturas, operacion);
+                    this.det_VentTableAdapter.FillByATQ(this.dbSIADataDetalles.Det_Vent, operacion);
+                    this.movtosTableAdapter.FillByATQ(this.dbCreditoDataCredito.movtos, operacion);
                     lugarExpedicion = "45850";
                     pathxDinamico = pathxATQ;
                     opServer = 2;
                 }
                 catch (Exception error)
-            {
-                
+                {
+
+                }
             }
-        }
             else if (sucursal == "10" || sucursal == "11" || sucursal == "12")
             {
-                try { 
-                //almacen = "03"; //IXTLAHUACAN
-                this.facturasTableAdapter.FillByIXTLA(this.dbSIADataFact.Facturas, operacion);
-                this.det_VentTableAdapter.FillByIXTLA(this.dbSIADataDetalles.Det_Vent, operacion);
-                this.movtosTableAdapter.FillByIXTLA(this.dbCreditoDataCredito.movtos, operacion);
+                try
+                {
+                    //almacen = "03"; //IXTLAHUACAN
+                    this.facturasTableAdapter.FillByIXTLA(this.dbSIADataFact.Facturas, operacion);
+                    this.det_VentTableAdapter.FillByIXTLA(this.dbSIADataDetalles.Det_Vent, operacion);
+                    this.movtosTableAdapter.FillByIXTLA(this.dbCreditoDataCredito.movtos, operacion);
                     lugarExpedicion = "45860";
                     pathxDinamico = pathxIXT;
                     opServer = 3;
                 }
                 catch (Exception error)
                 {
-                    
                 }
             }
             else if (sucursal == "21" || sucursal == "22" || sucursal == "23" || sucursal == "24" || sucursal == "25" || sucursal == "26" || sucursal == "27" || sucursal == "28" || sucursal == "29")
             {
-                try { 
-                //almacen = "04"; //TLAJOMULCO
-                this.facturasTableAdapter.FillByTLAJO(this.dbSIADataFact.Facturas, operacion);
-                this.det_VentTableAdapter.FillByTLAJO(this.dbSIADataDetalles.Det_Vent, operacion);
-                this.movtosTableAdapter.FillByTLAJO(this.dbCreditoDataCredito.movtos, operacion);
+                try
+                {
+                    //almacen = "04"; //TLAJOMULCO
+                    this.facturasTableAdapter.FillByTLAJO(this.dbSIADataFact.Facturas, operacion);
+                    this.det_VentTableAdapter.FillByTLAJO(this.dbSIADataDetalles.Det_Vent, operacion);
+                    this.movtosTableAdapter.FillByTLAJO(this.dbCreditoDataCredito.movtos, operacion);
                     lugarExpedicion = "45640";
                     pathxDinamico = pathxTLA;
                     opServer = 4;
                 }
                 catch (Exception error)
                 {
-                   
                 }
             }
             else
@@ -1451,10 +1519,9 @@ namespace WindowsFormsApp2
                 }
                 catch
                 {
-
                 }
-                
-                if(sucursal == "GDL")
+
+                if (sucursal == "GDL")
                 {
                     //Llenar gdl
                     this.facturasTableAdapter.Fill(this.dbSIADataFact.Facturas, operacion);
@@ -1462,7 +1529,7 @@ namespace WindowsFormsApp2
                     pathxDinamico = pathxGDL;
                     opServer = 1;
                 }
-                else if(sucursal == "ATE")
+                else if (sucursal == "ATE")
                 {
                     //Llenar ate
                     this.facturasTableAdapter.FillByATQ(this.dbSIADataFact.Facturas, operacion);
@@ -1470,7 +1537,7 @@ namespace WindowsFormsApp2
                     pathxDinamico = pathxATQ;
                     opServer = 2;
                 }
-                else if(sucursal == "IXT")
+                else if (sucursal == "IXT")
                 {
                     //Llenar ixtla
                     this.facturasTableAdapter.FillByIXTLA(this.dbSIADataFact.Facturas, operacion);
@@ -1478,7 +1545,7 @@ namespace WindowsFormsApp2
                     pathxDinamico = pathxIXT;
                     opServer = 3;
                 }
-                else if(sucursal == "TLA")
+                else if (sucursal == "TLA")
                 {
                     //Llenar tlajo
                     this.facturasTableAdapter.FillByTLAJO(this.dbSIADataFact.Facturas, operacion);
@@ -1496,7 +1563,7 @@ namespace WindowsFormsApp2
             //MessageBox.Show("FECHA: " + diaCarpeta);
             if (Directory.Exists(pathxDinamico + diaCarpeta))
             {
-               // MessageBox.Show("La carpeta ya existe : " + pathxDinamico + diaCarpeta);
+                // MessageBox.Show("La carpeta ya existe : " + pathxDinamico + diaCarpeta);
             }
             else
             {
@@ -1521,7 +1588,7 @@ namespace WindowsFormsApp2
                 vFila.Cells[30].Style.Format = "n2";
             }
 
-                foreach (DataGridViewRow vFila in det_VentDataGridView.Rows)
+            foreach (DataGridViewRow vFila in det_VentDataGridView.Rows)
             {
                 vFila.Cells[13].Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
                 vFila.Cells[14].Style.Alignment = DataGridViewContentAlignment.MiddleCenter;
@@ -1551,17 +1618,17 @@ namespace WindowsFormsApp2
 
             //NOTA DE CREDITO ################################################################
 
-            
-            
+
+
             string recibo;
             foreach (DataGridViewRow vFila in timbreCreditoDataGridView.Rows)
             {
 
                 recibo = vFila.Cells[2].Value.ToString();
                 //MessageBox.Show("Recibo: " + recibo);
-                cmd.CommandText = "SELECT * FROM  TimbreCredito where Recibo = '"+recibo+"'";
+                cmd.CommandText = "SELECT * FROM  TimbreCredito where Recibo = '" + recibo + "'";
                 lector = cmd.ExecuteReader();
-                
+
                 if (lector.HasRows)
                 {
                     //lector.Read();
@@ -1574,7 +1641,7 @@ namespace WindowsFormsApp2
                 }
                 lector.Close();
             }
-            
+
             //TERMINA PINTAR
 
             try
@@ -1614,7 +1681,7 @@ namespace WindowsFormsApp2
                 textNumOp.Text = row[0].Cells[2].Value.ToString();
                 textEmail.Text = row[0].Cells[14].Value.ToString();
                 textTelefono.Text = row[0].Cells[15].Value.ToString();
-                
+
                 //A letras
                 string totalnum = row[0].Cells[30].Value.ToString();
                 totalletras = enletras(totalnum);
@@ -1627,8 +1694,8 @@ namespace WindowsFormsApp2
                 {
                     Cursor.Current = Cursors.Default;
                     labelInfo.Text = "ESTA ES FACTURA GLOBAL";
-                    texttotal.Text = "TOTAL DE LA FACTURA: "+importeGlobal;
-                    
+                    texttotal.Text = "TOTAL DE LA FACTURA: " + importeGlobal;
+
                     buttonReFac.Enabled = false;
                     ButtonPagos.Enabled = false;
 
@@ -1646,13 +1713,14 @@ namespace WindowsFormsApp2
             try
             {
                 int salir = 0;
-                int conta1=1;
-                while (facturasDataGridView.Rows[facturasDataGridView.Rows.Count - conta1].ToString() != null && salir == 0) {
+                int conta1 = 1;
+                while (facturasDataGridView.Rows[facturasDataGridView.Rows.Count - conta1].ToString() != null && salir == 0)
+                {
                     facturasDataGridView.Rows[facturasDataGridView.Rows.Count - conta1].Selected = true;
                     DataGridViewSelectedRowCollection row = facturasDataGridView.SelectedRows;
                     numOpNC = row[0].Cells[4].Value.ToString();
                     conta1++;
-                    
+
                     if (numOpNC.Contains("NC"))
                     {
                         salir = 1;
@@ -1707,13 +1775,13 @@ namespace WindowsFormsApp2
                 ButtonPagos.Enabled = true;
 
             }
-            if(RFCAnterior != "XAXX010101000")
+            if (RFCAnterior != "XAXX010101000")
             {
                 ButtonFacturar.Enabled = false;
                 buttonReFac.Enabled = false;
                 ButtonPagos.Enabled = true;
-                buttonCorreo.Enabled = false;
-                if(RFCAnterior is null)
+                buttonCorreo.Enabled = true;
+                if (RFCAnterior is null)
                 {
                     labelInfo.Text = "ESTA OPERACIÓN NO TIENE FACTURA";
                 }
@@ -1721,9 +1789,9 @@ namespace WindowsFormsApp2
                 {
                     labelInfo.Text = "ESTA OPERACIÓN TIENE RFC NOMINATIVO";
                 }
-                
+
             }
-            if (timbreCreditoDataGridView.CurrentRow == null) 
+            if (timbreCreditoDataGridView.CurrentRow == null)
             {
                 ButtonPagos.Enabled = false;
             }
@@ -1874,11 +1942,14 @@ namespace WindowsFormsApp2
                 labelInfo.Text = "RE FACTURACIÓN COMPLETA";
             }
             Cursor.Current = Cursors.Default;
+            
         }
 
         //TIMBRAR ABONOS Y ENGANCHE 1.300.1 ------------------------------------------------------######################################### PAGOS ###############################
         private void TimbrarPagos()
         {
+            bool timbrar = true;
+
             Cursor.Current = Cursors.WaitCursor;
             //Conexion sql
             String servidor = GetServidor(5);
@@ -1888,329 +1959,962 @@ namespace WindowsFormsApp2
             SqlDataReader lector;
             string recibo, cancelada="";
             int error = 0;
-            foreach (DataGridViewRow vFila in timbreCreditoDataGridView.Rows)
-            {
-                servidor = GetServidor(5);
-                cn = new SqlConnection(servidor);
-                cn.Open();
-                cmd = cn.CreateCommand();
-                recibo = vFila.Cells[2].Value.ToString();
-                //MessageBox.Show("Recibo: " + recibo);
-                cmd.CommandText = "SELECT * FROM  TimbreCredito where Recibo = '" + recibo + "'";
-                lector = cmd.ExecuteReader();
-                error = 0;
-                if (lector.HasRows)
+
+            
+                //--------------------------------------------------------------
+                foreach (DataGridViewRow vFila in timbreCreditoDataGridView.Rows)
                 {
-                    //Ya está timbrado
-                }
-                else
-                {
-                    try
+                    servidor = GetServidor(5);
+                    cn = new SqlConnection(servidor);
+                    cn.Open();
+                    cmd = cn.CreateCommand();
+                    recibo = vFila.Cells[2].Value.ToString();
+                    //MessageBox.Show("Recibo: " + recibo);
+                    cmd.CommandText = "SELECT Tipo FROM  TimbreCredito where Recibo = '" + recibo + "'";
+                    lector = cmd.ExecuteReader();
+                    error = 0;
+                    if (lector.HasRows)
                     {
                         
-                        //Preparar datos
-                        
-                        lector.Close();
-                        cmd.CommandText = "SELECT Descuento, Concepto, Cantidad, FormaPago, SaldoAct, SaldoAnt, Parcialidad FROM  movtos where recibo = '" + recibo + "'";
-                        lector = cmd.ExecuteReader();
-                        if (lector.HasRows)
+                    }
+                    else
+                    {
+                        try
                         {
-                            lector.Read();
-                            //MessageBox.Show("Concepto: " + lector.GetString(1));
-                            //pDescuento = lector.GetInt32(0);
-                            pDescuento = Convert.ToDecimal(lector.GetInt32(0));
-                            pConcepto = lector.GetString(1);
-                            pCantidad = lector.GetDecimal(2);
-                            pFormaDePago = lector.GetString(3);
-                            pSaldoAct = lector.GetDecimal(4);
-                            pSaldoAnt = lector.GetDecimal(5);
+
+                            //Preparar datos
+
+                            lector.Close();
+                            cmd.CommandText = "SELECT Descuento, Concepto, Cantidad, FormaPago, SaldoAct, SaldoAnt, Parcialidad, interes FROM  movtos where recibo = '" + recibo + "'";
+                            lector = cmd.ExecuteReader();
+                            if (lector.HasRows)
+                            {
+                                lector.Read();
+                                //MessageBox.Show("Concepto: " + lector.GetString(1));
+                                //pDescuento = lector.GetInt32(0);
+                                pDescuento = Convert.ToDecimal(lector.GetInt32(0)); //Timbrar descuentos de los abonos 
+                                pConcepto = lector.GetString(1);
+                                pCantidad = lector.GetDecimal(2);
+                                pFormaDePago = lector.GetString(3);
+                                pSaldoAct = lector.GetDecimal(4);
+                                pSaldoAnt = lector.GetDecimal(5);
+
+                                try
+                                {
+                                    pParcialidad = Convert.ToString(lector.GetInt32(6));
+                                }
+                                catch
+                                {
+                                    error = 1;
+                                    MessageBox.Show("ESTE ABONO NO TIENE NÚMERO DE PARCIALIDAD O ESTÁ CANCELADO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    lector.Close();
+                                }
                             try
                             {
-                                pParcialidad = Convert.ToString(lector.GetInt32(6));
+                                pInteres = lector.GetDecimal(7); //Timbra los abonos que tienen interes
                             }
                             catch
                             {
-                                error = 1;
-                                MessageBox.Show("ESTE ABONO NO TIENE NÚMERO DE PARCIALIDAD O ESTÁ CANCELADO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                lector.Close();
+                                pInteres = 0;
                             }
-                            if(pConcepto == "CANCELADO")
-                            {
-                                error = 1;
-                                cancelada = recibo;
-                            }
-                            if(recibo == cancelada)
-                            {
-                                error = 1;
-                            }
-                            numOp = numOpSinCambios + "P" + pParcialidad;
-                        }
-                        else
-                        {
-                            MessageBox.Show("LA FACTURA NO CONTIENE ABONOS", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            error = 1;
-                        }
-                        lector.Close();
-                        cn.Close();
+                                
 
-                        servidor = GetServidor(opServer);
-                        cn = new SqlConnection(servidor);
-                        cn.Open();
-                        cmd = cn.CreateCommand();
-
-                        cmd.CommandText = "SELECT UUID FROM  Facturas where Numero = '" + oPagosOperacion + "'";
-                        lector = cmd.ExecuteReader();
-                        if (lector.HasRows){
-                            lector.Read();
-                            //MessageBox.Show("UUID: " + lector.GetString(0));
-                            oUUID = lector.GetString(0);
-                        }
-                        else
-                        {
-                            MessageBox.Show("LA FACTURA NO CONTIENE UUID", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            error = 1;
-                        }
-                        lector.Close();
-                        cn.Close();
-                        if (error != 1)
-                        {
-
-                            //Timbrar------------------------------##################
-                            
-                            Comprobante oComprobante = new Comprobante();
-
-                            oComprobante.Version = "3.3";
-                            oComprobante.Folio = oPagosOperacion; //Numero de operacion
-                            dateTimePicker1.Format = DateTimePickerFormat.Custom;
-                            dateTimePicker1.CustomFormat = "yyyy-MM-ddTHH:mm:ss";
-                            oComprobante.Fecha = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Formato que debe llevar 
-                            oComprobante.NoCertificado = ObtenerCertificado();
-                            oComprobante.SubTotal = 0;
-                            oComprobante.Total = 0;
-                            oComprobante.Moneda = c_Moneda.XXX;
-                            oComprobante.TipoDeComprobante = c_TipoDeComprobante.P; //Siempre P en factura pagos
-                            oComprobante.LugarExpedicion = lugarExpedicion;
-
-
-
-                            ComprobanteEmisor oEmisor = new ComprobanteEmisor();
-                            oEmisor.RegimenFiscal = c_RegimenFiscal.Item601; //Siempre el mismo
-                            ComprobanteReceptor oReceptor = new ComprobanteReceptor();
-
-                            /*
-                            //REALES
-                            oEmisor.Rfc = "CRE840310TC6";
-                            oEmisor.Nombre = "COMERCIAL DEL RETIRO SA DE CV";
-
-                            //REALES
-                            oReceptor.Nombre = nombre;
-                            oReceptor.Rfc = RFC;
-                            */
-
-                            //PRUEBA
-                            oEmisor.Rfc = "TES030201001";
-                            oEmisor.Nombre = "temporal";
-
-                            //PRUEBA
-                            oReceptor.Nombre = "temporal";
-                            oReceptor.Rfc = "TEST010203001";
-                            oReceptor.UsoCFDI = c_UsoCFDI.P01;
-
-                            oComprobante.Emisor = oEmisor;
-                            oComprobante.Receptor = oReceptor;
-
-                            List<ComprobanteConcepto> lstConceptos = new List<ComprobanteConcepto>();
-                            ComprobanteConcepto oConcepto = new ComprobanteConcepto();
-                            oConcepto.Importe = 0;
-                            oConcepto.ClaveProdServ = "84111506"; //Siempre para Pagos
-                            oConcepto.Cantidad = 1;
-                            oConcepto.ClaveUnidad = "ACT"; //siempre
-                            oConcepto.Descripcion = "Pago";
-                            oConcepto.ValorUnitario = 0;
-                            // oConcepto.Descuento = 1;
-
-                            lstConceptos.Add(oConcepto);
-
-                            oComprobante.Conceptos = lstConceptos.ToArray();
-
-                            Pagos oPagos = new Pagos();
-                            List<PagosPago> lstPagos = new List<PagosPago>();
-                            PagosPago oPago = new PagosPago();
-
-
-                            oPago.MonedaP = c_Moneda.MXN;
-                            if (pFormaDePago == "28")
-                            {
-                                oPago.FormaDePagoP = c_FormaPago.Item28;
-                            }
-                            else if(pFormaDePago == "03")
-                            {
-                                oPago.FormaDePagoP = c_FormaPago.Item03;
+                                if (pConcepto == "CANCELADO")
+                                {
+                                    error = 1;
+                                    cancelada = recibo;
+                                }
+                                if (recibo == cancelada)
+                                {
+                                    error = 1;
+                                }
+                                numOp = numOpSinCambios + "P" + pParcialidad;
                             }
                             else
                             {
-                                oPago.FormaDePagoP = c_FormaPago.Item01;
+                                MessageBox.Show("LA FACTURA NO CONTIENE ABONOS", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                error = 1;
                             }
+                            lector.Close();
+                            cn.Close();
 
-                            oPago.Monto = Math.Round(pCantidad, 2);
-                            oPago.FechaPago = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Formato que debe llevar 
+                            servidor = GetServidor(opServer);
+                            cn = new SqlConnection(servidor);
+                            cn.Open();
+                            cmd = cn.CreateCommand();
 
-                            //Doctos relacionados
-                            List<PagosPagoDoctoRelacionado> lstDoctos = new List<PagosPagoDoctoRelacionado>();
-                            PagosPagoDoctoRelacionado oDoctoRelacionado = new PagosPagoDoctoRelacionado();
-                            oDoctoRelacionado.IdDocumento = oUUID;
-                            oDoctoRelacionado.MonedaDR = c_Moneda.MXN;
-                            oDoctoRelacionado.MetodoDePagoDR = c_MetodoPago.PPD;
-                            oDoctoRelacionado.NumParcialidad = pParcialidad;
-                            oDoctoRelacionado.ImpSaldoInsoluto = Math.Round(pSaldoAct, 2);
-                            oDoctoRelacionado.ImpPagado = Math.Round(pCantidad, 2);
-                            oDoctoRelacionado.ImpSaldoAnt = Math.Round(pSaldoAnt, 2);
-                            oDoctoRelacionado.Folio = oPagosOperacion +"-"+ recibo;
-
-                            lstDoctos.Add(oDoctoRelacionado);
-
-                            oPago.DoctoRelacionado = lstDoctos.ToArray();
-
-                            lstPagos.Add(oPago);
-                            oPagos.Pago = lstPagos.ToArray();
-
-                            oComprobante.Complemento = new ComprobanteComplemento[1];
-                            oComprobante.Complemento[0] = new ComprobanteComplemento();
-
-
-                            XmlDocument docPago = new XmlDocument();
-                            XmlSerializerNamespaces xmlNameSpacePago = new XmlSerializerNamespaces();
-                            xmlNameSpacePago.Add("pago10", "http://www.sat.gob.mx");
-                            using (XmlWriter writer = docPago.CreateNavigator().AppendChild())
+                            cmd.CommandText = "SELECT UUID FROM  Facturas where Numero = '" + oPagosOperacion + "'";
+                            lector = cmd.ExecuteReader();
+                            if (lector.HasRows)
                             {
-                                new XmlSerializer(oPagos.GetType()).Serialize(writer, oPagos, xmlNameSpacePago);
+                                lector.Read();
+                                //MessageBox.Show("UUID: " + lector.GetString(0));
+                                oUUID = lector.GetString(0);
                             }
-                            oComprobante.Complemento[0].Any = new XmlElement[1];
-                            oComprobante.Complemento[0].Any[0] = docPago.DocumentElement;
-
-
-                            //Crear el XML 
-                            XML(oComprobante); 
-                            //xsl //Crear la cadena 
-                            string cadenaOriginal = "";
-                            string pathxsl = @"\\192.168.0.2\Sistemas\Sistemas\Refacturacion\Sellos\cadenaoriginal_3_3.xslt";
-                            System.Xml.Xsl.XslCompiledTransform transformador = new System.Xml.Xsl.XslCompiledTransform(true);
-                            transformador.Load(pathxsl);
-                            using (StringWriter sw = new StringWriter())
-                            using (XmlWriter xwo = XmlWriter.Create(sw, transformador.OutputSettings))
+                            else
                             {
-                                transformador.Transform(pathXML, xwo);
-                                cadenaOriginal = sw.ToString();
+                                MessageBox.Show("LA FACTURA NO CONTIENE UUID", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                error = 1;
                             }
-                            //Sellar el documento
-                            SelloDigital oselloDigital = new SelloDigital();
-                            oComprobante.Certificado = oselloDigital.Certificado(pathCer);
-                            oComprobante.Sello = Test_Mex_Sign_Data(cadenaOriginal);
-                            //Sobre escribir el xml ya sellado
-                            XML(oComprobante);
-
-                            //Se instancia el WS de Timbrado.
-                            ServiceReferenceFac.WSCFDI33Client ServicioTimbrado_FEL = new ServiceReferenceFac.WSCFDI33Client();
-
-                            //Se instancia la Respuesta del WS de Timbrado.
-                            ServiceReferenceFac.RespuestaTFD33 RespuestaTimbrado_FEL = new ServiceReferenceFac.RespuestaTFD33();
-                            ServiceReferenceFac.RespuestaTFD33 RespuestaServicio_FEL = new ServiceReferenceFac.RespuestaTFD33();
-                            //Se carga el XML desde archivo.
-                            XmlDocument DocumentoXML = new XmlDocument();
-                            //La direccion se sustituira dependiendo de donde se leera el XML.
-                            DocumentoXML.Load(pathxDinamico + diaCarpeta + numOpPathXMLFac +".xml");
-
-                            //Variable string que contiene el contenido del XML.
-                            string stringXML = null;
-                            stringXML = DocumentoXML.OuterXml;
-                            //Timbrar
-
-                            // ############## VALIDAR RFC --------------------------------------------------------------
-                            //ServicioTimbrado_FEL.ValidarRFC("", "", "");
-
-                            RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContraseñaFEll, stringXML, numOp);
-
-                            //"DEMO010233001", "Pruebas1a$", "C62D76BA-7E57-7E57-7E57-23288A910663", ""
-                            //Obteniendo la respuesta se valida que haya sido exitosa.
-                            if (RespuestaTimbrado_FEL.OperacionExitosa == true)
+                            lector.Close();
+                            cn.Close();
+                            if (error != 1)
                             {
-                                MessageBox.Show("ESTADO DEL PAGO: " + RespuestaTimbrado_FEL.Timbre.Estado + System.Environment.NewLine, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                observaciones = RespuestaTimbrado_FEL.Timbre.Estado.ToString();
-                                UUIDNUEVO = RespuestaTimbrado_FEL.Timbre.UUID.ToString();
 
-                                DocumentoXML.LoadXml(RespuestaTimbrado_FEL.XMLResultado);
-                                DocumentoXML.Save(pathxDinamico + diaCarpeta + numOp + ".xml");
+                                //Timbrar------------------------------##################
 
-                                //Guardar el abono timbrado
-                                //UUIDNUEVO, oUUID
-                                servidor = GetServidor(5);
-                                cn = new SqlConnection(servidor);
-                                cn.Open();
-                                cmd = cn.CreateCommand();
+                                Comprobante oComprobante = new Comprobante();
 
-                                try
+                                oComprobante.Version = "3.3";
+                                oComprobante.Folio = oPagosOperacion; //Numero de operacion
+                                dateTimePicker1.Format = DateTimePickerFormat.Custom;
+                                dateTimePicker1.CustomFormat = "yyyy-MM-ddTHH:mm:ss";
+                                oComprobante.Fecha = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Formato que debe llevar 
+                                oComprobante.NoCertificado = ObtenerCertificado();
+                                oComprobante.SubTotal = 0;
+                                oComprobante.Total = 0;
+                                oComprobante.Moneda = c_Moneda.XXX;
+                                oComprobante.TipoDeComprobante = c_TipoDeComprobante.P; //Siempre P en factura pagos
+                                oComprobante.LugarExpedicion = lugarExpedicion;
+
+
+
+                                ComprobanteEmisor oEmisor = new ComprobanteEmisor();
+                                oEmisor.RegimenFiscal = c_RegimenFiscal.Item601; //Siempre el mismo
+                                ComprobanteReceptor oReceptor = new ComprobanteReceptor();
+
+                                /*
+                                //REALES
+                                oEmisor.Rfc = "CRE840310TC6";
+                                oEmisor.Nombre = "COMERCIAL DEL RETIRO SA DE CV";
+
+                                //REALES
+                                oReceptor.Nombre = nombre;
+                                oReceptor.Rfc = RFC;
+                                */
+
+                                //PRUEBA
+                                oEmisor.Rfc = "TES030201001";
+                                oEmisor.Nombre = "temporal";
+
+                                //PRUEBA
+                                oReceptor.Nombre = "temporal";
+                                oReceptor.Rfc = "TEST010203001";
+                                oReceptor.UsoCFDI = c_UsoCFDI.P01;
+
+                                oComprobante.Emisor = oEmisor;
+                                oComprobante.Receptor = oReceptor;
+
+                                List<ComprobanteConcepto> lstConceptos = new List<ComprobanteConcepto>();
+                                ComprobanteConcepto oConcepto = new ComprobanteConcepto();
+                                oConcepto.Importe = 0;
+                                oConcepto.ClaveProdServ = "84111506"; //Siempre para Pagos
+                                oConcepto.Cantidad = 1;
+                                oConcepto.ClaveUnidad = "ACT"; //siempre
+                                oConcepto.Descripcion = "Pago";
+                                oConcepto.ValorUnitario = 0;
+                                // oConcepto.Descuento = 1;
+
+                                lstConceptos.Add(oConcepto);
+
+                                oComprobante.Conceptos = lstConceptos.ToArray();
+
+                                Pagos oPagos = new Pagos();
+                                List<PagosPago> lstPagos = new List<PagosPago>();
+                                PagosPago oPago = new PagosPago();
+
+
+                                oPago.MonedaP = c_Moneda.MXN;
+                                if (pFormaDePago == "28")
                                 {
-                                    dateTimePicker1.Format = DateTimePickerFormat.Custom;
-                                    dateTimePicker1.CustomFormat = "yyyy-MM-dd H:mm:ss";
-                                    fecha = dateTimePicker1.Text;
-                                    cmd.CommandText = "INSERT INTO dbo.TimbreCredito([Recibo],[Operacion],[Total],[Fecha],[UUID],[Observaciones],[Tipo],[Estatus],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + recibo + "','" + oPagosOperacion + "','" + pCantidad + "',@FechaHoy,'" + UUIDNUEVO + "','" + observaciones + "',null,null,'" + oUUID + "',null);";
-                                    cmd.Parameters.Add("@FechaHoy", SqlDbType.Date).Value = dateTimePicker1.Value;
-                                    cmd.ExecuteNonQuery();
+                                    oPago.FormaDePagoP = c_FormaPago.Item28;
                                 }
-                                catch(Exception err)
+                                else if (pFormaDePago == "03")
                                 {
-                                    Cursor.Current = Cursors.Default;
-                                    MessageBox.Show("ERROR AL GUARDAR EN BASE DE DATOS: " + err, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    oPago.FormaDePagoP = c_FormaPago.Item03;
+                                }
+                                else
+                                {
+                                    oPago.FormaDePagoP = c_FormaPago.Item01;
                                 }
 
-                                //Generar PDF
-                                RespuestaServicio_FEL = ServicioTimbrado_FEL.ObtenerPDF(UsuarioFell, ContraseñaFEll, UUIDNUEVO, "");
-                                //Guardo el PDF del CFDi.
-                                facturaOK = 0;
-                                try
+                                oPago.Monto = Math.Round(pCantidad, 2);
+                                oPago.FechaPago = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Formato que debe llevar 
+
+                                //Doctos relacionados
+                                List<PagosPagoDoctoRelacionado> lstDoctos = new List<PagosPagoDoctoRelacionado>();
+                                PagosPagoDoctoRelacionado oDoctoRelacionado = new PagosPagoDoctoRelacionado();
+                                oDoctoRelacionado.IdDocumento = oUUID;
+                                oDoctoRelacionado.MonedaDR = c_Moneda.MXN;
+                                oDoctoRelacionado.MetodoDePagoDR = c_MetodoPago.PPD;
+                                oDoctoRelacionado.NumParcialidad = pParcialidad;
+                                oDoctoRelacionado.ImpSaldoInsoluto = Math.Round(pSaldoAct+pDescuento, 2);
+                                oDoctoRelacionado.ImpPagado = Math.Round(pCantidad, 2);
+                                oDoctoRelacionado.ImpSaldoAnt = Math.Round(pSaldoAnt, 2);
+                                oDoctoRelacionado.Folio = oPagosOperacion + "-" + recibo;
+
+                                lstDoctos.Add(oDoctoRelacionado);
+
+                                oPago.DoctoRelacionado = lstDoctos.ToArray();
+
+                                lstPagos.Add(oPago);
+                                oPagos.Pago = lstPagos.ToArray();
+
+                                oComprobante.Complemento = new ComprobanteComplemento[1];
+                                oComprobante.Complemento[0] = new ComprobanteComplemento();
+
+
+                                XmlDocument docPago = new XmlDocument();
+                                XmlSerializerNamespaces xmlNameSpacePago = new XmlSerializerNamespaces();
+                                xmlNameSpacePago.Add("pago10", "http://www.sat.gob.mx");
+                                using (XmlWriter writer = docPago.CreateNavigator().AppendChild())
                                 {
-                                    File.WriteAllBytes(pathxDinamico + diaCarpeta + numOp+ ".pdf", Convert.FromBase64String(RespuestaServicio_FEL.PDFResultado));
+                                    new XmlSerializer(oPagos.GetType()).Serialize(writer, oPagos, xmlNameSpacePago);
+                                }
+                                oComprobante.Complemento[0].Any = new XmlElement[1];
+                                oComprobante.Complemento[0].Any[0] = docPago.DocumentElement;
+
+
+                                //Crear el XML 
+                                XML(oComprobante);
+                                //xsl //Crear la cadena 
+                                string cadenaOriginal = "";
+                                string pathxsl = @"\\192.168.0.2\Sistemas\Sistemas\Refacturacion\Sellos\cadenaoriginal_3_3.xslt";
+                                System.Xml.Xsl.XslCompiledTransform transformador = new System.Xml.Xsl.XslCompiledTransform(true);
+                                transformador.Load(pathxsl);
+                                using (StringWriter sw = new StringWriter())
+                                using (XmlWriter xwo = XmlWriter.Create(sw, transformador.OutputSettings))
+                                {
+                                    transformador.Transform(pathXML, xwo);
+                                    cadenaOriginal = sw.ToString();
+                                }
+                                //Sellar el documento
+                                SelloDigital oselloDigital = new SelloDigital();
+                                oComprobante.Certificado = oselloDigital.Certificado(pathCer);
+                                oComprobante.Sello = Test_Mex_Sign_Data(cadenaOriginal);
+                                //Sobre escribir el xml ya sellado
+                                XML(oComprobante);
+
+                                //Se instancia el WS de Timbrado.
+                                ServiceReferenceFac.WSCFDI33Client ServicioTimbrado_FEL = new ServiceReferenceFac.WSCFDI33Client();
+
+                                //Se instancia la Respuesta del WS de Timbrado.
+                                ServiceReferenceFac.RespuestaTFD33 RespuestaTimbrado_FEL = new ServiceReferenceFac.RespuestaTFD33();
+                                ServiceReferenceFac.RespuestaTFD33 RespuestaServicio_FEL = new ServiceReferenceFac.RespuestaTFD33();
+                                //Se carga el XML desde archivo.
+                                XmlDocument DocumentoXML = new XmlDocument();
+                                //La direccion se sustituira dependiendo de donde se leera el XML.
+                                DocumentoXML.Load(pathxDinamico + diaCarpeta + numOpPathXMLFac + ".xml");
+
+                                //Variable string que contiene el contenido del XML.
+                                string stringXML = null;
+                                stringXML = DocumentoXML.OuterXml;
+                                //Timbrar
+
+                                // ############## VALIDAR RFC --------------------------------------------------------------
+                                //ServicioTimbrado_FEL.ValidarRFC("", "", "");
+
+                                RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContrasenaFEll, stringXML, numOp);
+
+                                //"DEMO010233001", "Pruebas1a$", "C62D76BA-7E57-7E57-7E57-23288A910663", ""
+                                //Obteniendo la respuesta se valida que haya sido exitosa.
+                                if (RespuestaTimbrado_FEL.OperacionExitosa == true)
+                                {
+                                    MessageBox.Show("ESTADO DEL PAGO: " + RespuestaTimbrado_FEL.Timbre.Estado + System.Environment.NewLine, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    observaciones = RespuestaTimbrado_FEL.Timbre.Estado.ToString();
+                                    UUIDNUEVO = RespuestaTimbrado_FEL.Timbre.UUID.ToString();
+
+                                    DocumentoXML.LoadXml(RespuestaTimbrado_FEL.XMLResultado);
+                                    DocumentoXML.Save(pathxDinamico + diaCarpeta + numOp + ".xml");
+
+
+                                    //Guardar el abono timbrado
+                                    //UUIDNUEVO, oUUID
+                                    servidor = GetServidor(5);
+                                    cn = new SqlConnection(servidor);
+                                    cn.Open();
+                                    cmd = cn.CreateCommand();
+
                                     try
                                     {
-                                        EnviarCorreo(pathxDinamico + diaCarpeta + numOp+ ".pdf", pathxDinamico + diaCarpeta + numOp+".xml", to);
+                                        dateTimePicker1.Format = DateTimePickerFormat.Custom;
+                                        dateTimePicker1.CustomFormat = "yyyy-MM-dd H:mm:ss";
+                                        fecha = dateTimePicker1.Text;
+                                        cmd.CommandText = "INSERT INTO dbo.TimbreCredito([Recibo],[Operacion],[Total],[Fecha],[UUID],[Observaciones],[Tipo],[Estatus],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + recibo + "','" + oPagosOperacion + "','" + pCantidad + "',@FechaHoy,'" + UUIDNUEVO + "','" + observaciones + "','ABONO',null,'" + oUUID + "',null);";
+                                        cmd.Parameters.Add("@FechaHoy", SqlDbType.Date).Value = dateTimePicker1.Value;
+                                        cmd.ExecuteNonQuery();
                                     }
-                                    catch
+                                    catch (Exception err)
                                     {
                                         Cursor.Current = Cursors.Default;
-                                        MessageBox.Show("NO SE ENVIÓ EL CORREO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        MessageBox.Show("ERROR AL GUARDAR EN BASE DE DATOS: " + err, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    }
+
+                                    //Generar PDF
+                                    RespuestaServicio_FEL = ServicioTimbrado_FEL.ObtenerPDF(UsuarioFell, ContrasenaFEll, UUIDNUEVO, "");
+                                    //Guardo el PDF del CFDi.
+                                    facturaOK = 0;
+                                    try
+                                    {
+                                        File.WriteAllBytes(pathxDinamico + diaCarpeta + numOp + ".pdf", Convert.FromBase64String(RespuestaServicio_FEL.PDFResultado));
+                                        try
+                                        {
+                                            EnviarCorreo(pathxDinamico + diaCarpeta + numOp + ".pdf", pathxDinamico + diaCarpeta + numOp + ".xml", to);
+                                        }
+                                        catch
+                                        {
+                                            Cursor.Current = Cursors.Default;
+                                            MessageBox.Show("NO SE ENVIÓ EL CORREO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                        }
+                                    }
+                                    catch (Exception errorPdf)
+                                    {
+                                        Cursor.Current = Cursors.Default;
+                                        MessageBox.Show("ERROR PDF:" + errorPdf, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                        MessageBox.Show("" + RespuestaServicio_FEL.CodigoRespuesta + System.Environment.NewLine +
+                                        RespuestaServicio_FEL.MensajeError + System.Environment.NewLine +
+                                         RespuestaServicio_FEL.MensajeErrorDetallado + System.Environment.NewLine);
+                                    }
+
+                                    if(pDescuento > 0)
+                                    {
+                                        TimbrarDescuento(oUUID, oPagosOperacion, recibo, pDescuento);
+                                    }
+                                    if(pInteres > 0)
+                                    {
+                                        TimbrarInteres(recibo, oPagosOperacion, oUUID, pInteres);
                                     }
                                 }
-                                catch (Exception errorPdf)
+                                else
                                 {
                                     Cursor.Current = Cursors.Default;
-                                    MessageBox.Show("ERROR PDF:" + errorPdf, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                                    MessageBox.Show("" + RespuestaServicio_FEL.CodigoRespuesta + System.Environment.NewLine +
-                                    RespuestaServicio_FEL.MensajeError + System.Environment.NewLine +
-                                     RespuestaServicio_FEL.MensajeErrorDetallado + System.Environment.NewLine);
+                                    MessageBox.Show("ERROR: " + RespuestaTimbrado_FEL.CodigoRespuesta + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeError + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeErrorDetallado + System.Environment.NewLine, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                                    observaciones = RespuestaTimbrado_FEL.CodigoRespuesta.ToString() + "  " + RespuestaTimbrado_FEL.MensajeErrorDetallado.ToString();
+                                    facturaOK = 1;
                                 }
-
-                            }
-                            else
-                            {
-                                Cursor.Current = Cursors.Default;
-                                MessageBox.Show("ERROR: " + RespuestaTimbrado_FEL.CodigoRespuesta + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeError + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeErrorDetallado + System.Environment.NewLine, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                                observaciones = RespuestaTimbrado_FEL.CodigoRespuesta.ToString() + "  " + RespuestaTimbrado_FEL.MensajeErrorDetallado.ToString();
-                                facturaOK = 1;
                             }
                         }
+                        catch (Exception erro)
+                        {
+                            Cursor.Current = Cursors.Default;
+                            MessageBox.Show("ERROR DE SISTEMA, NO SE TIMBRO EL PAGO" + Environment.NewLine + erro, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+
+                        //Termina timbrar ---------------------##################
                     }
-                    catch(Exception erro)
-                    {
-                        Cursor.Current = Cursors.Default;
-                        MessageBox.Show("ERROR DE SISTEMA, NO SE TIMBRO EL PAGO" + Environment.NewLine + erro, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    
-                    //Termina timbrar ---------------------##################
+                    lector.Close();
                 }
-                lector.Close();
-            }
+            
 
             Cursor.Current = Cursors.Default;
+
+        }
+
+        //TIMBRAR INTERES ------------------------------------------------%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+        private void TimbrarInteres(string recibo_, string operacion_, string UUIDRela_, decimal importe_)
+        {
+            try
+            {
+                decimal totaltotal = 0;
+                Comprobante oComprobante = new Comprobante();
+                oComprobante.Version = "3.3";
+                oComprobante.Folio = recibo_+"INT"; //Numero de operacion
+                dateTimePicker1.Format = DateTimePickerFormat.Custom;
+                dateTimePicker1.CustomFormat = "yyyy-MM-ddTHH:mm:ss";
+                oComprobante.Fecha = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Formato que debe llevar 
+                                                                                          //CASE PARA FORMA DE PAGO
+
+                switch (formaPago)
+                {
+                    case (99):
+                        oComprobante.FormaPago = c_FormaPago.Item99;
+                        break;
+                    case (01):
+                        oComprobante.FormaPago = c_FormaPago.Item01;
+                        break;
+                    case (04):
+                        oComprobante.FormaPago = c_FormaPago.Item04;
+                        break;
+                    case (28):
+                        oComprobante.FormaPago = c_FormaPago.Item28;
+                        break;
+                    case (02):
+                        oComprobante.FormaPago = c_FormaPago.Item02;
+                        break;
+                    case (03):
+                        oComprobante.FormaPago = c_FormaPago.Item03;
+                        break;
+                    default:
+                        oComprobante.FormaPago = c_FormaPago.Item01;
+                        break;
+                }
+
+                oComprobante.NoCertificado = ObtenerCertificado();
+
+                
+                //oComprobante.Descuento = 0;
+                
+                oComprobante.Moneda = c_Moneda.MXN;
+
+                oComprobante.TipoDeComprobante = c_TipoDeComprobante.I; //Siempre ingreso en factura
+
+                
+                oComprobante.MetodoPago = c_MetodoPago.PUE;
+                
+
+                //oComprobante.CondicionesDePago = "Pago"; //Condiciones de pago. No es obligatorio
+
+                oComprobante.LugarExpedicion = lugarExpedicion;
+
+                ComprobanteEmisor oEmisor = new ComprobanteEmisor();
+                oEmisor.RegimenFiscal = c_RegimenFiscal.Item601; //Siempre el mismo
+                ComprobanteReceptor oReceptor = new ComprobanteReceptor();
+
+                /*
+                //REALES
+                oEmisor.Rfc = "CRE840310TC6";
+                oEmisor.Nombre = "COMERCIAL DEL RETIRO SA DE CV";
+
+                //REALES
+                oReceptor.Nombre = nombre;
+                oReceptor.Rfc = RFC;
+                */
+
+
+                //PRUEBA
+                oEmisor.Rfc = "TES030201001";
+                oEmisor.Nombre = "temporal";
+
+                //PRUEBA
+                oReceptor.Nombre = "temporal";
+                oReceptor.Rfc = "TEST010203001";
+
+
+                oComprobante.Emisor = oEmisor;
+                oComprobante.Receptor = oReceptor;
+
+                ComprobanteCfdiRelacionados oComprobanteCFDI = new ComprobanteCfdiRelacionados();
+
+                oComprobanteCFDI.TipoRelacion = c_TipoRelacion.Item02; // Siempre va este
+
+                ComprobanteCfdiRelacionadosCfdiRelacionado oComprobanteCFDIRel = new ComprobanteCfdiRelacionadosCfdiRelacionado();
+                List<ComprobanteCfdiRelacionadosCfdiRelacionado> lstCfdiRelacRelac = new List<ComprobanteCfdiRelacionadosCfdiRelacionado>();
+
+                oComprobanteCFDIRel.UUID = UUIDRela_; //UUIDPAGO
+                lstCfdiRelacRelac.Add(oComprobanteCFDIRel);
+                oComprobanteCFDI.CfdiRelacionado = lstCfdiRelacRelac.ToArray();
+                oComprobante.CfdiRelacionados = oComprobanteCFDI;
+
+
+                //Switch uso CFDI
+                switch (usoCFDII)
+                {
+                    case "P01":
+                        oReceptor.UsoCFDI = c_UsoCFDI.P01;
+                        break;
+                    case "G01":
+                        oReceptor.UsoCFDI = c_UsoCFDI.G01;
+                        break;
+                    case "G02":
+                        oReceptor.UsoCFDI = c_UsoCFDI.G02;
+                        break;
+                    case "G03":
+                        oReceptor.UsoCFDI = c_UsoCFDI.G03;
+                        break;
+                    case "I01":
+                        oReceptor.UsoCFDI = c_UsoCFDI.I01;
+                        break;
+                    case "I02":
+                        oReceptor.UsoCFDI = c_UsoCFDI.I02;
+                        break;
+                    case "I03":
+                        oReceptor.UsoCFDI = c_UsoCFDI.I03;
+                        break;
+                    case "I04":
+                        oReceptor.UsoCFDI = c_UsoCFDI.I04;
+                        break;
+                    case "I05":
+                        oReceptor.UsoCFDI = c_UsoCFDI.I05;
+                        break;
+                    case "I06":
+                        oReceptor.UsoCFDI = c_UsoCFDI.I06;
+                        break;
+                    case "I07":
+                        oReceptor.UsoCFDI = c_UsoCFDI.I07;
+                        break;
+                    case "I08":
+                        oReceptor.UsoCFDI = c_UsoCFDI.I08;
+                        break;
+                    case "D01":
+                        oReceptor.UsoCFDI = c_UsoCFDI.D01;
+                        break;
+                    case "D02":
+                        oReceptor.UsoCFDI = c_UsoCFDI.D02;
+                        break;
+                    case "D03":
+                        oReceptor.UsoCFDI = c_UsoCFDI.D03;
+                        break;
+                    case "D04":
+                        oReceptor.UsoCFDI = c_UsoCFDI.D04;
+                        break;
+                    case "D05":
+                        oReceptor.UsoCFDI = c_UsoCFDI.D05;
+                        break;
+                    case "D06":
+                        oReceptor.UsoCFDI = c_UsoCFDI.D06;
+                        break;
+                    case "D07":
+                        oReceptor.UsoCFDI = c_UsoCFDI.D07;
+                        break;
+                    case "D08":
+                        oReceptor.UsoCFDI = c_UsoCFDI.D08;
+                        break;
+                    case "D09":
+                        oReceptor.UsoCFDI = c_UsoCFDI.D09;
+                        break;
+                    case "D10":
+                        oReceptor.UsoCFDI = c_UsoCFDI.D10;
+                        break;
+                    default:
+                        oReceptor.UsoCFDI = c_UsoCFDI.P01;
+                        break;
+
+                }
+
+                List<ComprobanteConcepto> lstConceptos = new List<ComprobanteConcepto>();
+                List<ComprobanteConceptoImpuestos> lstimpuesto = new List<ComprobanteConceptoImpuestos>();
+                List<ComprobanteConceptoImpuestosTraslado> lstTrasla = new List<ComprobanteConceptoImpuestosTraslado>();
+
+                ComprobanteConcepto oConcepto = new ComprobanteConcepto();
+                oConcepto.ClaveProdServ = "84111506";
+
+                oConcepto.Cantidad = 1;
+                oConcepto.ClaveUnidad = "ACT"; //Codigo para especificar que es por pieza
+                oConcepto.NoIdentificacion = operacion_+recibo_+"INT";
+                oConcepto.Unidad = "0"; //Por default
+                oConcepto.Descripcion = "INTERES CORRESPONDIENTE AL RECIBO "+recibo_+" CON LA OPERACION "+operacion_+" Y SU UUID "+ UUIDRela_;
+                oConcepto.ValorUnitario = Math.Round((importe_) / 1.16m, 2);
+                //oConcepto.Descuento = Math.Round(descuento / 1.16m, 2);
+
+                oConcepto.Importe = Math.Round((importe_ / 1.16m) * 1, 2);
+
+                ComprobanteConceptoImpuestosTraslado oTraslados = new ComprobanteConceptoImpuestosTraslado();
+                ComprobanteConceptoImpuestos oImpuestos = new ComprobanteConceptoImpuestos();
+                //Aquí pondremos los impuestos
+                oTraslados.Base = Math.Round(importe_ / 1.16m, 2); //Sin iva
+                oTraslados.Impuesto = c_Impuesto.Item002; //Siempre sera esto
+                oTraslados.TipoFactor = c_TipoFactor.Tasa; // Siempre sera esto
+                oTraslados.TasaOCuota = 0.160000m; //Siempre sera esto
+                oTraslados.Importe = Math.Round((importe_ / 1.16m) * 0.16m, 2); //Iva
+
+                ivaTotal = Math.Round(ivaTotal + ((importe_ / 1.16m) * 0.16m), 2);
+
+                lstTrasla.Add(oTraslados);
+                oImpuestos.Traslados = lstTrasla.ToArray();
+                lstTrasla.Clear();
+
+                oConcepto.Impuestos = oImpuestos;
+
+                lstConceptos.Add(oConcepto);
+                oComprobante.Conceptos = lstConceptos.ToArray();
+
+                
+
+                ComprobanteImpuestos oImpuestosG = new ComprobanteImpuestos();
+                ComprobanteImpuestosTraslado oTrasladosG = new ComprobanteImpuestosTraslado();
+                oTrasladosG.Impuesto = c_Impuesto.Item002;
+                oTrasladosG.TipoFactor = c_TipoFactor.Tasa;
+                oTrasladosG.TasaOCuota = 0.160000m;
+                oTrasladosG.Importe = ivaTotal; //TOTAL DE IMPUESTOS
+
+                List<ComprobanteImpuestosTraslado> lstImpTrasla = new List<ComprobanteImpuestosTraslado>();
+
+                lstImpTrasla.Add(oTrasladosG);
+                oImpuestosG.Traslados = lstImpTrasla.ToArray();
+                oImpuestosG.TotalImpuestosTrasladados = ivaTotal; //TOTAL DE IMPUESTOS
+                oComprobante.Impuestos = oImpuestosG;
+
+                oComprobante.SubTotal = Math.Round(importe_ - ivaTotal, 2);
+                //MessageBox.Show("Subtotal: " + Math.Round(totaltotal, 2));
+                oComprobante.Total = Math.Round(importe_, 2);
+                //MessageBox.Show("Subtotal: " + Math.Round(totaltotal + ivaTotal, 2));
+
+                //Crear el XML 
+                XML(oComprobante);
+                //xsl //Crear la cadena 
+                string cadenaOriginal = "";
+                string pathxsl = @"\\192.168.0.2\Sistemas\Sistemas\Refacturacion\Sellos\cadenaoriginal_3_3.xslt";
+                System.Xml.Xsl.XslCompiledTransform transformador = new System.Xml.Xsl.XslCompiledTransform(true);
+                transformador.Load(pathxsl);
+                using (StringWriter sw = new StringWriter())
+                using (XmlWriter xwo = XmlWriter.Create(sw, transformador.OutputSettings))
+                {
+                    transformador.Transform(pathXML, xwo);
+                    cadenaOriginal = sw.ToString();
+                }
+                //Sellar el documento
+                SelloDigital oselloDigital = new SelloDigital();
+                oComprobante.Certificado = oselloDigital.Certificado(pathCer);
+                oComprobante.Sello = Test_Mex_Sign_Data(cadenaOriginal);
+                //Sobre escribir el xml ya sellado
+                XML(oComprobante);
+
+                //Se instancia el WS de Timbrado.
+                ServiceReferenceFac.WSCFDI33Client ServicioTimbrado_FEL = new ServiceReferenceFac.WSCFDI33Client();
+
+                //Se instancia la Respuesta del WS de Timbrado.
+                ServiceReferenceFac.RespuestaTFD33 RespuestaTimbrado_FEL = new ServiceReferenceFac.RespuestaTFD33();
+                ServiceReferenceFac.RespuestaTFD33 RespuestaServicio_FEL = new ServiceReferenceFac.RespuestaTFD33();
+                //Se carga el XML desde archivo.
+                XmlDocument DocumentoXML = new XmlDocument();
+                //La direccion se sustituira dependiendo de donde se leera el XML.
+                DocumentoXML.Load(pathxDinamico + diaCarpeta + numOpPathXMLFac + ".xml");
+
+                //Variable string que contiene el contenido del XML.
+                string stringXML = null;
+                stringXML = DocumentoXML.OuterXml;
+                //Timbrar
+
+                // ############## VALIDAR RFC --------------------------------------------------------------
+                //ServicioTimbrado_FEL.ValidarRFC("", "", "");
+
+                RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContrasenaFEll, stringXML, numOp);
+
+                //"DEMO010233001", "Pruebas1a$", "C62D76BA-7E57-7E57-7E57-23288A910663", ""
+                //Conexion sql
+                String servidor = GetServidor(5);
+                SqlConnection cn = new SqlConnection(servidor);
+                cn.Open();
+                SqlCommand cmd = cn.CreateCommand();
+                //Obteniendo la respuesta se valida que haya sido exitosa.
+                if (RespuestaTimbrado_FEL.OperacionExitosa == true)
+                {
+                    MessageBox.Show("ESTADO DEL INTERES: " + RespuestaTimbrado_FEL.Timbre.Estado + System.Environment.NewLine, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    observaciones = RespuestaTimbrado_FEL.Timbre.Estado.ToString();
+                    UUIDNUEVO = RespuestaTimbrado_FEL.Timbre.UUID.ToString();
+
+                    DocumentoXML.LoadXml(RespuestaTimbrado_FEL.XMLResultado);
+                    DocumentoXML.Save(pathxDinamico + diaCarpeta + operacion_ + recibo_ + "INT.xml");
+
+                    //Generar PDF
+                    RespuestaServicio_FEL = ServicioTimbrado_FEL.ObtenerPDF(UsuarioFell, ContrasenaFEll, UUIDNUEVO, "");
+                    //Guardo el PDF del CFDi.
+
+                    facturaOK = 0;
+                    try
+                    {
+                        File.WriteAllBytes(pathxDinamico + diaCarpeta + operacion_ + recibo_+ ".pdf", Convert.FromBase64String(RespuestaServicio_FEL.PDFResultado));
+                        try
+                        {
+                            //Enviar pdf por correo(Si es que existe) Crear metodo para enviar
+                            EnviarCorreo(pathxDinamico + diaCarpeta + operacion_ + recibo_+ ".pdf", pathxDinamico + diaCarpeta + operacion_  + recibo_ + "INT.xml", to);
+                        }
+                        catch
+                        {
+                            MessageBox.Show("NO SE ENVIÓ EL CORREO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
+                    }
+                    catch (Exception errorPdf)
+                    {
+                        MessageBox.Show("ERROR PDF:" + errorPdf, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show("" + RespuestaServicio_FEL.CodigoRespuesta + System.Environment.NewLine +
+                        RespuestaServicio_FEL.MensajeError + System.Environment.NewLine +
+                         RespuestaServicio_FEL.MensajeErrorDetallado + System.Environment.NewLine);
+                    }
+                    try
+                    {
+                        dateTimePicker1.Format = DateTimePickerFormat.Custom;
+                        dateTimePicker1.CustomFormat = "yyyy-MM-dd H:mm:ss";
+                        fecha = dateTimePicker1.Text;
+                        cmd.CommandText = "INSERT INTO dbo.TimbreCredito([Recibo],[Operacion],[Total],[Fecha],[UUID],[Observaciones],[Tipo],[Estatus],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + recibo_ + "','" + operacion_ + "','" + importe_ + "',@FechaHoy,'" + UUIDNUEVO + "','" + observaciones + "','INTERES',null,'" + UUIDRela_ + "',null);";
+                        cmd.Parameters.Add("@FechaHoy", SqlDbType.Date).Value = dateTimePicker1.Value;
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception err)
+                    {
+                        Cursor.Current = Cursors.Default;
+                        MessageBox.Show("ERROR AL GUARDAR EN BASE DE DATOS: " + err, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+
+
+                }
+                else
+                {
+                    MessageBox.Show("ERROR: " + RespuestaTimbrado_FEL.CodigoRespuesta + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeError + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeErrorDetallado + System.Environment.NewLine, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    observaciones = RespuestaTimbrado_FEL.CodigoRespuesta.ToString() + "  " + RespuestaTimbrado_FEL.MensajeErrorDetallado.ToString();
+                    facturaOK = 1;
+                    try
+                    {
+                        dateTimePicker1.Format = DateTimePickerFormat.Custom;
+                        dateTimePicker1.CustomFormat = "yyyy-MM-dd H:mm:ss";
+                        fecha = dateTimePicker1.Text;
+                        cmd.CommandText = "INSERT INTO dbo.TimbreCredito([Recibo],[Operacion],[Total],[Fecha],[UUID],[Observaciones],[Tipo],[Estatus],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + recibo_ + "','" + operacion_ + "','" + importe_ + "',@FechaHoy,null,'" + observaciones + "','INTERES',null,'" + UUIDRela_ + "',null);";
+                        cmd.Parameters.Add("@FechaHoy", SqlDbType.Date).Value = dateTimePicker1.Value;
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception err)
+                    {
+                        Cursor.Current = Cursors.Default;
+                        MessageBox.Show("ERROR AL GUARDAR EN BASE DE DATOS: " + err, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+            }
+            catch
+            {
+                MessageBox.Show("NO SE TIMBRO EL INTERES", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                facturaOK = 1;
+            }
+        }
+
+        // TIMBRAR DESCUENTO
+        private void TimbrarDescuento(string UUIDRela_, string operacion_, string recibo_, decimal importe_)
+        {
+            totald = importe_;
+            try
+            {
+                
+                //Crear XML de nota de credito
+                Comprobante oComprobante = new Comprobante();
+
+                oComprobante.Version = "3.3";
+                oComprobante.Folio = recibo_+"DESC";//Numero de operacion 
+
+                dateTimePicker1.Format = DateTimePickerFormat.Custom;
+                dateTimePicker1.CustomFormat = "yyyy-MM-ddTHH:mm:ss";
+                oComprobante.Fecha = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Formato que debe llevar 
+                                                                                          // CASE PARA FORMA DE PAGO
+
+                switch (formaPago)
+                {
+                    case (99):
+                        oComprobante.FormaPago = c_FormaPago.Item99;
+                        break;
+                    case (01):
+                        oComprobante.FormaPago = c_FormaPago.Item01;
+                        break;
+                    case (04):
+                        oComprobante.FormaPago = c_FormaPago.Item04;
+                        break;
+                    case (28):
+                        oComprobante.FormaPago = c_FormaPago.Item28;
+                        break;
+                }
+                oComprobante.NoCertificado = ObtenerCertificado();
+                oComprobante.SubTotal = Math.Round((totald / 1.16m), 2);
+                oComprobante.Moneda = c_Moneda.MXN;
+                oComprobante.Total = Math.Round(totald, 2);
+                oComprobante.TipoDeComprobante = c_TipoDeComprobante.E; //Siempre egreso en nota de credito
+                oComprobante.MetodoPago = c_MetodoPago.PUE;
+                
+                oComprobante.LugarExpedicion = lugarExpedicion;
+
+                ComprobanteCfdiRelacionados oComprobanteCFDI = new ComprobanteCfdiRelacionados();
+
+                oComprobanteCFDI.TipoRelacion = c_TipoRelacion.Item01; // Siempre va este
+
+                ComprobanteCfdiRelacionadosCfdiRelacionado oComprobanteCFDIRel = new ComprobanteCfdiRelacionadosCfdiRelacionado();
+                List<ComprobanteCfdiRelacionadosCfdiRelacionado> lstCfdiRelacRelac = new List<ComprobanteCfdiRelacionadosCfdiRelacionado>();
+
+                oComprobanteCFDIRel.UUID = UUIDRela_; //UUIDPAGO
+                lstCfdiRelacRelac.Add(oComprobanteCFDIRel);
+                oComprobanteCFDI.CfdiRelacionado = lstCfdiRelacRelac.ToArray();
+                oComprobante.CfdiRelacionados = oComprobanteCFDI;
+
+
+                ComprobanteEmisor oEmisor = new ComprobanteEmisor();
+                oEmisor.RegimenFiscal = c_RegimenFiscal.Item601; //Siempre va este
+                ComprobanteReceptor oReceptor = new ComprobanteReceptor();
+
+                //PRUEBAS
+                oEmisor.Rfc = "TES030201001";
+                oEmisor.Nombre = "temporal";
+
+                //PRUEBAS
+                oReceptor.Nombre = "temporal";
+                oReceptor.Rfc = "TEST010203001";
+                /*
+                //REAL
+                oEmisor.Rfc = "CRE840310TC6";
+                oEmisor.Nombre = "Comercial Del Retiro SA de CV";
+
+                //REAL
+                oReceptor.Nombre = "PUBLICO EN GENERAL";
+                oReceptor.Rfc = RFCAnterior;
+
+                /*
+                if (RFCAnterior == "XAXX010101000")
+                {
+                    //REAL
+                    oReceptor.Nombre = "PUBLICO EN GENERAL";
+                    oReceptor.Rfc = RFCAnterior;
+                }
+                else
+                {
+                    //REAL
+                    oReceptor.Nombre = nombre;
+                    oReceptor.Rfc = RFCAnterior;
+                }
+                */
+
+
+                //Asignar emisor y receptor
+                oComprobante.Emisor = oEmisor;
+                oComprobante.Receptor = oReceptor;
+
+                //Uso CFDI descuentos o bonificaciones
+                oReceptor.UsoCFDI = c_UsoCFDI.G02;
+                
+                decimal totaldd = totald - (totald * 0.16m);
+
+                List<ComprobanteConcepto> lstConceptos = new List<ComprobanteConcepto>();
+                List<ComprobanteConceptoImpuestos> lstimpuesto = new List<ComprobanteConceptoImpuestos>();
+                List<ComprobanteConceptoImpuestosTraslado> lstTrasla = new List<ComprobanteConceptoImpuestosTraslado>();
+                ComprobanteConcepto oConcepto = new ComprobanteConcepto();
+                ComprobanteConceptoImpuestosTraslado oTraslados = new ComprobanteConceptoImpuestosTraslado();
+                ComprobanteConceptoImpuestos oImpuestos = new ComprobanteConceptoImpuestos();
+                oConcepto.ClaveProdServ = "84111506";
+                oConcepto.NoIdentificacion = operacion_+recibo_+"DESC";
+                oConcepto.Cantidad = 1m;
+                oConcepto.ClaveUnidad = "ACT";
+                oConcepto.Unidad = "0";
+                oConcepto.Descripcion = "DESCUENTO CORRESPONDIENTE AL RECIBO "+recibo_+" CON LA OPERACION " + operacion_ + " Y SU UUID "+UUIDRela_;
+                oConcepto.ValorUnitario = Math.Round((totald / 1.16m), 2);
+                oConcepto.Importe = Math.Round((totald / 1.16m), 2); //################## ESTABA AQUI REVISANDO EL TOTAL DEL DESCUENTO 12:50
+
+
+                //Aquí pondremos los impuestos
+                oTraslados.Base = Math.Round((totald / 1.16m), 2); //Sin iva
+                oTraslados.Impuesto = c_Impuesto.Item002; //Siempre sera esto
+                oTraslados.TipoFactor = c_TipoFactor.Tasa;
+                oTraslados.TasaOCuota = 0.160000m;
+                oTraslados.Importe = Math.Round(totald - (totald / 1.16m), 2);
+
+                lstTrasla.Add(oTraslados);
+                oImpuestos.Traslados = lstTrasla.ToArray();
+                lstTrasla.Clear();
+
+                oConcepto.Impuestos = oImpuestos;
+
+                lstConceptos.Add(oConcepto);
+                oComprobante.Conceptos = lstConceptos.ToArray();
+
+                ComprobanteImpuestos oImpuestos2 = new ComprobanteImpuestos();
+                ComprobanteImpuestosTraslado oTraslado2 = new ComprobanteImpuestosTraslado();
+                List<ComprobanteImpuestosTraslado> lstTraslado2 = new List<ComprobanteImpuestosTraslado>();
+                oImpuestos2.TotalImpuestosTrasladados = Math.Round(totald - (totald / 1.16m), 2);
+
+                oTraslado2.Impuesto = c_Impuesto.Item002;
+                oTraslado2.TipoFactor = c_TipoFactor.Tasa;
+                oTraslado2.TasaOCuota = 0.160000m;
+                oTraslado2.Importe = Math.Round(totald - (totald / 1.16m), 2);
+                lstTraslado2.Add(oTraslado2);
+                oImpuestos2.Traslados = lstTraslado2.ToArray();
+                oComprobante.Impuestos = oImpuestos2;
+
+                //Crear el XML 
+                XML(oComprobante);
+                //xsl //Crear la cadena 
+                string cadenaOriginal = "";
+                string pathxsl = @"\\192.168.0.2\Sistemas\Sistemas\Refacturacion\Sellos\cadenaoriginal_3_3.xslt";
+                System.Xml.Xsl.XslCompiledTransform transformador = new System.Xml.Xsl.XslCompiledTransform(true);
+                transformador.Load(pathxsl);
+                using (StringWriter sw = new StringWriter())
+                using (XmlWriter xwo = XmlWriter.Create(sw, transformador.OutputSettings))
+                {
+                    transformador.Transform(pathXML, xwo);
+                    cadenaOriginal = sw.ToString();
+                    //MessageBox.Show(cadenaOriginal + "");
+                }
+
+                //Sellar el documento
+                SelloDigital oselloDigital = new SelloDigital();
+                oComprobante.Certificado = oselloDigital.Certificado(pathCer);
+                oComprobante.Sello = Test_Mex_Sign_Data(cadenaOriginal);
+
+                //Sobre escribir el xml ya sellado 
+                XML(oComprobante);
+
+
+                //Se instancia el WS de Timbrado.
+                ServiceReferenceFac.WSCFDI33Client ServicioTimbrado_FEL = new ServiceReferenceFac.WSCFDI33Client();
+
+                //Se instancia la Respuesta del WS de Timbrado.
+                ServiceReferenceFac.RespuestaTFD33 RespuestaTimbrado_FEL = new ServiceReferenceFac.RespuestaTFD33();
+
+                //Se carga el XML desde archivo.
+                XmlDocument DocumentoXML = new XmlDocument();
+                //La direccion se sustituira dependiendo de donde se leera el XML.
+
+                DocumentoXML.Load(pathxDinamico + diaCarpeta + numOpPathXMLFac + ".xml");
+
+                //Variable string que contiene el contenido del XML.
+                string stringXML = null;
+                stringXML = DocumentoXML.OuterXml;
+                //Timbrar
+                RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContrasenaFEll, stringXML, recibo_);
+                //Guardar el abono timbrado
+                //UUIDNUEVO, oUUID
+                //Conexion sql
+                String servidor = GetServidor(5);
+                SqlConnection cn = new SqlConnection(servidor);
+                cn.Open();
+                SqlCommand cmd = cn.CreateCommand();
+                //Obteniendo la respuesta se valida que haya sido exitosa.
+                if (RespuestaTimbrado_FEL.OperacionExitosa == true)
+                {
+                    MessageBox.Show("ESTADO DEL DESCUENTO: " + RespuestaTimbrado_FEL.Timbre.Estado + System.Environment.NewLine, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Asterisk);
+                    UUIDNUEVO = RespuestaTimbrado_FEL.Timbre.UUID + System.Environment.NewLine;
+                    observaciones = RespuestaTimbrado_FEL.Timbre.Estado.ToString();
+                    DocumentoXML.LoadXml(RespuestaTimbrado_FEL.XMLResultado);
+                    DocumentoXML.Save(pathxDinamico + diaCarpeta + recibo_ + "DESC.xml");
+                    facturaOK = 0;
+                    
+
+                    try
+                    {
+                        dateTimePicker1.Format = DateTimePickerFormat.Custom;
+                        dateTimePicker1.CustomFormat = "yyyy-MM-dd H:mm:ss";
+                        fecha = dateTimePicker1.Text;
+                        cmd.CommandText = "INSERT INTO dbo.TimbreCredito([Recibo],[Operacion],[Total],[Fecha],[UUID],[Observaciones],[Tipo],[Estatus],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + recibo_ + "','" + operacion_ + "','" + importe_ + "',@FechaHoy,'" + UUIDNUEVO + "','" + observaciones + "','DESCUENTO',null,'" + UUIDRela_ + "',null);";
+                        cmd.Parameters.Add("@FechaHoy", SqlDbType.Date).Value = dateTimePicker1.Value;
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception err)
+                    {
+                        Cursor.Current = Cursors.Default;
+                        MessageBox.Show("ERROR AL GUARDAR EN BASE DE DATOS: " + err, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    
+                }
+                else
+                {
+                    MessageBox.Show("ERROR: " + RespuestaTimbrado_FEL.CodigoRespuesta + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeError + System.Environment.NewLine + RespuestaTimbrado_FEL.MensajeErrorDetallado + System.Environment.NewLine, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    observaciones = RespuestaTimbrado_FEL.CodigoRespuesta.ToString() + " " + RespuestaTimbrado_FEL.MensajeErrorDetallado.ToString();
+                    facturaOK = 1;
+                    try
+                    {
+                        dateTimePicker1.Format = DateTimePickerFormat.Custom;
+                        dateTimePicker1.CustomFormat = "yyyy-MM-dd H:mm:ss";
+                        fecha = dateTimePicker1.Text;
+                        cmd.CommandText = "INSERT INTO dbo.TimbreCredito([Recibo],[Operacion],[Total],[Fecha],[UUID],[Observaciones],[Tipo],[Estatus],[UUIDRelacionado],[UUIDCancelado]) VALUES('" + recibo_ + "','" + operacion_ + "','" + importe_ + "',@FechaHoy,null,'" + observaciones + "','DESCUENTO',null,'" + UUIDRela_ + "',null);";
+                        cmd.Parameters.Add("@FechaHoy", SqlDbType.Date).Value = dateTimePicker1.Value;
+                        cmd.ExecuteNonQuery();
+                    }
+                    catch (Exception err)
+                    {
+                        Cursor.Current = Cursors.Default;
+                        MessageBox.Show("ERROR AL GUARDAR EN BASE DE DATOS: " + err, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                }
+                cn.Close();
+
+            }
+            catch (Exception error)
+            {
+                facturaOK = 1;
+                MessageBox.Show("ERROR DE SISTEMA, NO SE PUDO TIMBRAR EL DESCUENTO" + Environment.NewLine + error, "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
 
         }
 
@@ -2287,7 +2991,7 @@ namespace WindowsFormsApp2
 
                 ComprobanteCfdiRelacionados oComprobanteCFDI = new ComprobanteCfdiRelacionados();
 
-                oComprobanteCFDI.TipoRelacion = c_TipoRelacion.Item02; // Siempre va este
+                oComprobanteCFDI.TipoRelacion = c_TipoRelacion.Item01; // Siempre va este
 
                 ComprobanteCfdiRelacionadosCfdiRelacionado oComprobanteCFDIRel = new ComprobanteCfdiRelacionadosCfdiRelacionado();
                 List<ComprobanteCfdiRelacionadosCfdiRelacionado> lstCfdiRelacRelac = new List<ComprobanteCfdiRelacionadosCfdiRelacionado>();
@@ -2497,7 +3201,7 @@ namespace WindowsFormsApp2
                 string stringXML = null;
                 stringXML = DocumentoXML.OuterXml;
                 //Timbrar
-                RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContraseñaFEll, stringXML, numOp);
+                RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContrasenaFEll, stringXML, numOp);
 
                 //Obteniendo la respuesta se valida que haya sido exitosa.
                 if (RespuestaTimbrado_FEL.OperacionExitosa == true)
@@ -2843,7 +3547,7 @@ namespace WindowsFormsApp2
                 // ############## VALIDAR RFC --------------------------------------------------------------
                 //ServicioTimbrado_FEL.ValidarRFC("", "", "");
 
-                RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContraseñaFEll, stringXML, numOp);
+                RespuestaTimbrado_FEL = ServicioTimbrado_FEL.TimbrarCFDI(UsuarioFell, ContrasenaFEll, stringXML, numOp);
 
                 //"DEMO010233001", "Pruebas1a$", "C62D76BA-7E57-7E57-7E57-23288A910663", ""
                 //Obteniendo la respuesta se valida que haya sido exitosa.
@@ -2857,7 +3561,7 @@ namespace WindowsFormsApp2
                     DocumentoXML.Save(pathxDinamico + diaCarpeta + numOp + ".xml");
 
                     //Generar PDF
-                    RespuestaServicio_FEL = ServicioTimbrado_FEL.ObtenerPDF(UsuarioFell, ContraseñaFEll, UUIDNUEVO, "");
+                    RespuestaServicio_FEL = ServicioTimbrado_FEL.ObtenerPDF(UsuarioFell, ContrasenaFEll, UUIDNUEVO, "");
                     //Guardo el PDF del CFDi.
                     facturaOK = 0;
                     try

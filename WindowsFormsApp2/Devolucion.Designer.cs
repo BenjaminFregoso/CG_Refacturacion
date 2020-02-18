@@ -98,6 +98,13 @@
             this.det_VentBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.dbSIADataDetalles = new WindowsFormsApp2.dbSIADataDetalles();
             this.timbreCreditoDataGridView = new System.Windows.Forms.DataGridView();
+            this.parcialidadDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Concepto = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.recibo = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Cantidad = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Feabono = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.movtosBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.dbCreditoDataCredito = new WindowsFormsApp2.dbCreditoDataCredito();
             this.panel3 = new System.Windows.Forms.Panel();
             this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
             this.checkOtro = new System.Windows.Forms.CheckBox();
@@ -172,13 +179,6 @@
             this.sqlDataSource1 = new DevExpress.DataAccess.Sql.SqlDataSource(this.components);
             this.panel4 = new System.Windows.Forms.Panel();
             this.label3 = new System.Windows.Forms.Label();
-            this.Concepto = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.recibo = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Cantidad = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Feabono = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.parcialidadDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.movtosBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.dbCreditoDataCredito = new WindowsFormsApp2.dbCreditoDataCredito();
             this.timbreCreditoBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.timbreCreditoTableAdapter = new WindowsFormsApp2.dbCreditoDataCreditoTableAdapters.TimbreCreditoTableAdapter();
             this.tableAdapterManager2 = new WindowsFormsApp2.dbCreditoDataCreditoTableAdapters.TableAdapterManager();
@@ -192,13 +192,13 @@
             ((System.ComponentModel.ISupportInitialize)(this.det_VentBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbSIADataDetalles)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.timbreCreditoDataGridView)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.movtosBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dbCreditoDataCredito)).BeginInit();
             this.panel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dbSIADataSetArt)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.articulosBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.panel4.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.movtosBindingSource)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dbCreditoDataCredito)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.timbreCreditoBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
@@ -853,6 +853,55 @@
             this.timbreCreditoDataGridView.Size = new System.Drawing.Size(579, 165);
             this.timbreCreditoDataGridView.TabIndex = 1;
             // 
+            // parcialidadDataGridViewTextBoxColumn
+            // 
+            this.parcialidadDataGridViewTextBoxColumn.DataPropertyName = "Parcialidad";
+            this.parcialidadDataGridViewTextBoxColumn.HeaderText = "Parcialidad";
+            this.parcialidadDataGridViewTextBoxColumn.Name = "parcialidadDataGridViewTextBoxColumn";
+            this.parcialidadDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // Concepto
+            // 
+            this.Concepto.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Concepto.DataPropertyName = "Concepto";
+            this.Concepto.HeaderText = "Concepto";
+            this.Concepto.Name = "Concepto";
+            this.Concepto.ReadOnly = true;
+            // 
+            // recibo
+            // 
+            this.recibo.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.recibo.DataPropertyName = "recibo";
+            this.recibo.HeaderText = "Recibo";
+            this.recibo.Name = "recibo";
+            this.recibo.ReadOnly = true;
+            // 
+            // Cantidad
+            // 
+            this.Cantidad.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Cantidad.DataPropertyName = "Cantidad";
+            this.Cantidad.HeaderText = "Cantidad";
+            this.Cantidad.Name = "Cantidad";
+            this.Cantidad.ReadOnly = true;
+            // 
+            // Feabono
+            // 
+            this.Feabono.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.Feabono.DataPropertyName = "Feabono";
+            this.Feabono.HeaderText = "Feabono";
+            this.Feabono.Name = "Feabono";
+            this.Feabono.ReadOnly = true;
+            // 
+            // movtosBindingSource
+            // 
+            this.movtosBindingSource.DataMember = "movtos";
+            this.movtosBindingSource.DataSource = this.dbCreditoDataCredito;
+            // 
+            // dbCreditoDataCredito
+            // 
+            this.dbCreditoDataCredito.DataSetName = "dbCreditoDataCredito";
+            this.dbCreditoDataCredito.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
+            // 
             // panel3
             // 
             this.panel3.BackColor = System.Drawing.Color.LightSlateGray;
@@ -1492,55 +1541,6 @@
             this.label3.TabIndex = 48;
             this.label3.Text = "Abonos";
             // 
-            // Concepto
-            // 
-            this.Concepto.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Concepto.DataPropertyName = "Concepto";
-            this.Concepto.HeaderText = "Concepto";
-            this.Concepto.Name = "Concepto";
-            this.Concepto.ReadOnly = true;
-            // 
-            // recibo
-            // 
-            this.recibo.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.recibo.DataPropertyName = "recibo";
-            this.recibo.HeaderText = "Recibo";
-            this.recibo.Name = "recibo";
-            this.recibo.ReadOnly = true;
-            // 
-            // Cantidad
-            // 
-            this.Cantidad.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Cantidad.DataPropertyName = "Cantidad";
-            this.Cantidad.HeaderText = "Cantidad";
-            this.Cantidad.Name = "Cantidad";
-            this.Cantidad.ReadOnly = true;
-            // 
-            // Feabono
-            // 
-            this.Feabono.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.Feabono.DataPropertyName = "Feabono";
-            this.Feabono.HeaderText = "Feabono";
-            this.Feabono.Name = "Feabono";
-            this.Feabono.ReadOnly = true;
-            // 
-            // parcialidadDataGridViewTextBoxColumn
-            // 
-            this.parcialidadDataGridViewTextBoxColumn.DataPropertyName = "Parcialidad";
-            this.parcialidadDataGridViewTextBoxColumn.HeaderText = "Parcialidad";
-            this.parcialidadDataGridViewTextBoxColumn.Name = "parcialidadDataGridViewTextBoxColumn";
-            this.parcialidadDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // movtosBindingSource
-            // 
-            this.movtosBindingSource.DataMember = "movtos";
-            this.movtosBindingSource.DataSource = this.dbCreditoDataCredito;
-            // 
-            // dbCreditoDataCredito
-            // 
-            this.dbCreditoDataCredito.DataSetName = "dbCreditoDataCredito";
-            this.dbCreditoDataCredito.SchemaSerializationMode = System.Data.SchemaSerializationMode.IncludeSchema;
-            // 
             // timbreCreditoBindingSource
             // 
             this.timbreCreditoBindingSource.DataMember = "TimbreCredito";
@@ -1602,14 +1602,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.det_VentBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbSIADataDetalles)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.timbreCreditoDataGridView)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.movtosBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.dbCreditoDataCredito)).EndInit();
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dbSIADataSetArt)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.articulosBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panel4.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.movtosBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.dbCreditoDataCredito)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.timbreCreditoBindingSource)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
