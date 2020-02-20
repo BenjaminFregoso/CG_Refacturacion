@@ -528,6 +528,7 @@ namespace WindowsFormsApp2
 
             DataGridViewSelectedRowCollection row = facturasDataGridView.SelectedRows;
             numOpCorreo = row[0].Cells[4].Value.ToString();
+                MessageBox.Show(numOpCorreo);
             diaCarpeta = row[0].Cells[5].Value.ToString();
             string uuidNom = row[0].Cells[16].Value.ToString();
             string diaCarpe;
@@ -546,7 +547,7 @@ namespace WindowsFormsApp2
                     SqlCommand cmd = cn.CreateCommand();
                     cmd.CommandText = "update dbo.Facturas set Correo = '" + correoNuevo + "' where Numero = '" + numOpCorreo + "' ";
                     cmd.ExecuteNonQuery();
-                    labelInfo.Text = "CORREO ACTUALIZADO CON ÉXITO";
+                    labelInfo.Text = "CORREO ACTUALIZADO Y ENVIADO CON ÉXITO";
                     EnviarCorreo(pathxDinamico + diaCarpe + numOpCorreo + ".pdf", pathxDinamico + diaCarpe + numOpCorreo + ".xml", correoNuevo);
                 }
                 catch (Exception errorCo)
@@ -600,7 +601,7 @@ namespace WindowsFormsApp2
                 try
                 {
                     protocoll.Send(mensaje);
-                    //MessageBox.Show("EL CORREO SE ENVIÓ CON ÉXITO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        //MessageBox.Show("EL CORREO SE ENVIÓ CON ÉXITO", "CASA GUERRERO", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     
                 }
                 catch (Exception errormsj)
@@ -1949,7 +1950,7 @@ namespace WindowsFormsApp2
         private void TimbrarPagos()
         {
             bool timbrar = true;
-
+            DateTime pfechad=dateTimePicker1.Value;
             Cursor.Current = Cursors.WaitCursor;
             //Conexion sql
             String servidor = GetServidor(5);
@@ -1985,7 +1986,7 @@ namespace WindowsFormsApp2
                             //Preparar datos
 
                             lector.Close();
-                            cmd.CommandText = "SELECT Descuento, Concepto, Cantidad, FormaPago, SaldoAct, SaldoAnt, Parcialidad, interes FROM  movtos where recibo = '" + recibo + "'";
+                            cmd.CommandText = "SELECT Descuento, Concepto, Cantidad, FormaPago, SaldoAct, SaldoAnt, Parcialidad, interes, Feabono FROM  movtos where recibo = '" + recibo + "'";
                             lector = cmd.ExecuteReader();
                             if (lector.HasRows)
                             {
@@ -1998,7 +1999,12 @@ namespace WindowsFormsApp2
                                 pFormaDePago = lector.GetString(3);
                                 pSaldoAct = lector.GetDecimal(4);
                                 pSaldoAnt = lector.GetDecimal(5);
-
+                                pfechad = lector.GetDateTime(8);
+                            
+                            //pfecha = pfecha.Substring(0, 19);
+                            //pfecha = pfecha.Replace(" ", "T");
+                            // "yyyy-MM-ddTHH:mm:ss"
+                            MessageBox.Show(String.Format("{0:s}", pfechad));
                                 try
                                 {
                                     pParcialidad = Convert.ToString(lector.GetInt32(6));
@@ -2069,7 +2075,7 @@ namespace WindowsFormsApp2
                                 oComprobante.Folio = oPagosOperacion; //Numero de operacion
                                 dateTimePicker1.Format = DateTimePickerFormat.Custom;
                                 dateTimePicker1.CustomFormat = "yyyy-MM-ddTHH:mm:ss";
-                                oComprobante.Fecha = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Formato que debe llevar 
+                                oComprobante.Fecha = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Fecha de la base
                                 oComprobante.NoCertificado = ObtenerCertificado();
                                 oComprobante.SubTotal = 0;
                                 oComprobante.Total = 0;
@@ -2139,7 +2145,7 @@ namespace WindowsFormsApp2
                                 }
 
                                 oPago.Monto = Math.Round(pCantidad, 2);
-                                oPago.FechaPago = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Formato que debe llevar 
+                                oPago.FechaPago = Convert.ToDateTime(String.Format("{0:s}", pfechad));  //Formato que debe llevar 
 
                                 //Doctos relacionados
                                 List<PagosPagoDoctoRelacionado> lstDoctos = new List<PagosPagoDoctoRelacionado>();
@@ -2323,32 +2329,20 @@ namespace WindowsFormsApp2
                 dateTimePicker1.Format = DateTimePickerFormat.Custom;
                 dateTimePicker1.CustomFormat = "yyyy-MM-ddTHH:mm:ss";
                 oComprobante.Fecha = Convert.ToDateTime(dateTimePicker1.Text.ToString()); //Formato que debe llevar 
-                                                                                          //CASE PARA FORMA DE PAGO
-
-                switch (formaPago)
+                
+                if (pFormaDePago == "28")
                 {
-                    case (99):
-                        oComprobante.FormaPago = c_FormaPago.Item99;
-                        break;
-                    case (01):
-                        oComprobante.FormaPago = c_FormaPago.Item01;
-                        break;
-                    case (04):
-                        oComprobante.FormaPago = c_FormaPago.Item04;
-                        break;
-                    case (28):
-                        oComprobante.FormaPago = c_FormaPago.Item28;
-                        break;
-                    case (02):
-                        oComprobante.FormaPago = c_FormaPago.Item02;
-                        break;
-                    case (03):
-                        oComprobante.FormaPago = c_FormaPago.Item03;
-                        break;
-                    default:
-                        oComprobante.FormaPago = c_FormaPago.Item01;
-                        break;
+                    oComprobante.FormaPago = c_FormaPago.Item28;
                 }
+                else if (pFormaDePago == "03")
+                {
+                    oComprobante.FormaPago = c_FormaPago.Item03;
+                }
+                else
+                {
+                    oComprobante.FormaPago = c_FormaPago.Item01;
+                }
+
 
                 oComprobante.NoCertificado = ObtenerCertificado();
 
@@ -2508,7 +2502,7 @@ namespace WindowsFormsApp2
                 oTraslados.TasaOCuota = 0.160000m; //Siempre sera esto
                 oTraslados.Importe = Math.Round((importe_ / 1.16m) * 0.16m, 2); //Iva
 
-                ivaTotal = Math.Round(ivaTotal + ((importe_ / 1.16m) * 0.16m), 2);
+                ivaTotal = Math.Round((importe_ / 1.16m) * 0.16m, 2);
 
                 lstTrasla.Add(oTraslados);
                 oImpuestos.Traslados = lstTrasla.ToArray();
